@@ -17,6 +17,7 @@ const errorController = require("./controllers/error");
 const shopRoutes = require("./routes/shopRoutes");
 
 const PORT = process.env.PORT || 3000;
+const MONGODB_URL = process.env.MONGODB_URL;
 
 if (
     !MONGODB_URL ||
@@ -28,6 +29,8 @@ if (
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+
+app.set("trust proxy", 1);
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -46,6 +49,7 @@ app.use(session({
     saveUninitialized: false,
     store,
     rolling: true,
+    proxy: true,
     cookie: {
         maxAge: 20 * 60 * 60 * 1000,
         httpOnly: true,
@@ -63,19 +67,6 @@ const {
 } = csrfSync({
     getTokenFromRequest: req => req.body?._csrf,
     ignoredMethods: ["GET", "HEAD", "OPTIONS"]
-});
-
-app.use((req, res, next) => {
-    console.log("SESSION DEBUG:", {
-        method: req.method,
-        path: req.path,
-        hasCookie: Boolean(req.headers.cookie),
-        hasSessionCookie: Boolean(req.headers.cookie?.includes("zeal.sid=")),
-        sessionID: req.sessionID,
-        nodeEnv: process.env.NODE_ENV
-    });
-
-    next();
 });
 
 app.use(csrfSynchronisedProtection);
@@ -114,8 +105,10 @@ mongoose.connect(MONGODB_URL)
         console.log("MongoDB connected");
 
         app.listen(PORT, "0.0.0.0", () => {
+            console.log(`Server running on port ${PORT}`);
         });
     })
     .catch(err => {
         console.error("MongoDB connection error:", err);
+        process.exit(1);
     });
