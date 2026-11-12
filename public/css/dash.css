@@ -1,0 +1,345 @@
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #f5f7fb;
+    color: #172033;
+    font-family: Arial, sans-serif;
+}
+
+.dashboard-container {
+    width: min(1150px, 92%);
+    margin: 45px auto;
+}
+
+.welcome-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    border: 1px solid #e9edf4;
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 25px;
+}
+
+.welcome-label {
+    color: #159b68;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    margin: 0 0 10px;
+}
+
+.welcome-section h2 {
+    font-size: 25px;
+    margin: 0;
+    font-weight: 750;
+}
+
+.welcome-description {
+    color: #8791a3;
+    font-size: 14px;
+    margin: 9px 0 0;
+}
+
+.welcome-icon {
+    width: 58px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    border-radius: 15px;
+    background: #e8f8f1;
+    color: #159b68;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.balance-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+    margin-bottom: 40px;
+}
+
+.balance-card {
+    position: relative;
+    overflow: hidden;
+    padding: 27px;
+    border-radius: 16px;
+    min-height: 190px;
+    color: white;
+}
+
+.wallet-balance {
+    background: linear-gradient(120deg, #087f5b, #12ad78);
+}
+
+.commission-balance {
+    background: linear-gradient(120deg, #243b80, #4266c7);
+}
+
+.balance-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.balance-top span {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.1px;
+    opacity: 0.85;
+}
+
+.balance-icon {
+    width: 35px;
+    height: 35px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    font-size: 19px;
+    font-weight: bold;
+}
+
+.balance-amount {
+    font-size: 32px;
+    font-weight: 750;
+    margin: 20px 0 16px;
+}
+
+.balance-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 650;
+    opacity: 0.9;
+    transition: gap 0.2s ease;
+}
+
+.balance-action:hover {
+    gap: 15px;
+    opacity: 1;
+}
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.section-heading h3 {
+    font-size: 21px;
+    margin: 0;
+    font-weight: 750;
+}
+
+.section-heading p {
+    color: #8791a3;
+    font-size: 13px;
+    margin: 7px 0 0;
+}
+
+.services-count {
+    background: #e8f8f1;
+    color: #159b68;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.service-link {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-height: 90px;
+    padding: 17px;
+    background: white;
+    border: 1px solid #e9edf4;
+    border-radius: 13px;
+    text-decoration: none;
+    color: #273247;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.service-link:hover {
+    transform: translateY(-4px);
+    border-color: #cbd8e8;
+    box-shadow: 0 9px 25px rgba(25, 42, 70, 0.07);
+}
+
+.service-icon {
+    width: 43px;
+    height: 43px;
+    min-width: 43px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    font-size: 21px;
+    background: #f0f5ff;
+}
+
+.service-name {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.service-arrow {
+    color: #a2aabb;
+    font-size: 17px;
+    transition: transform 0.2s ease;
+}
+
+.service-link:hover .service-arrow {
+    transform: translateX(4px);
+    color: #159b68;
+}
+
+.airtime-link .service-icon {
+    background: #e9f8f0;
+}
+
+.data-link .service-icon {
+    background: #eaf2ff;
+}
+
+.tv-link .service-icon {
+    background: #f1ebff;
+}
+
+.electricity-link .service-icon {
+    background: #fff5df;
+}
+
+.education-link .service-icon {
+    background: #e9f7ff;
+}
+
+.airtime-pins-link .service-icon {
+    background: #fff0e9;
+}
+
+.data-pins-link .service-icon {
+    background: #eaf8f8;
+}
+
+.bulk-sms-link .service-icon {
+    background: #fceefa;
+}
+
+.bulk-orders-link .service-icon {
+    background: #fff3e8;
+}
+
+.airtime-swap-link .service-icon {
+    background: #eaf1ff;
+}
+
+.pricing-link .service-icon {
+    background: #fff5df;
+}
+
+.sales-analysis-link .service-icon {
+    background: #e9f8f0;
+}
+
+@media (max-width: 900px) {
+    .services-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 650px) {
+    .dashboard-container {
+        width: 92%;
+        margin: 25px auto;
+    }
+
+    .welcome-section {
+        padding: 22px;
+    }
+
+    .welcome-section h2 {
+        font-size: 21px;
+    }
+
+    .welcome-description {
+        max-width: 240px;
+        line-height: 1.5;
+    }
+
+    .welcome-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 23px;
+    }
+
+    .balance-container {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        margin-bottom: 32px;
+    }
+
+    .balance-card {
+        min-height: 175px;
+        padding: 23px;
+    }
+
+    .balance-amount {
+        font-size: 28px;
+    }
+
+    .services-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .service-link {
+        min-height: 85px;
+        padding: 12px;
+        gap: 9px;
+    }
+
+    .service-icon {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        font-size: 18px;
+    }
+
+    .service-name {
+        font-size: 11px;
+    }
+
+    .service-arrow {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 360px) {
+    .services-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .services-count {
+        font-size: 9px;
+    }
+}
+

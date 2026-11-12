@@ -1,0 +1,156 @@
+
+<%- include("../includes/head.ejs") %>
+<link rel="stylesheet" href="/css/profile.css">
+</head>
+<body>
+  <%- include("../includes/nav.ejs") %>
+
+  <main class="profile-container">
+    <aside class="profile-sidebar">
+      <div class="sidebar-heading">
+        <h2>Settings</h2>
+        <p>Manage your account</p>
+      </div>
+
+      <nav class="settings-menu">
+        <button class="settings-link active" data-tab="personal">
+          Personal Information
+        </button>
+
+        <button class="settings-link" data-tab="security">
+          Security & Privacy
+        </button>
+
+        <button class="settings-link" data-tab="interface">
+          App Interface
+        </button>
+
+        <button class="settings-link" data-tab="support">
+          Help & Support
+        </button>
+
+        <button class="settings-link" data-tab="privacy">
+          Privacy Policy
+        </button>
+
+        <button class="settings-link" data-tab="terms">
+          Terms & Conditions
+        </button>
+
+        <button class="settings-link" data-tab="about">
+          About
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <% if ( isAuthenticated) { %>
+                        <a href="/profile">Profile</a>
+                        <form action="/logout" method="post">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit">Logout</button>
+                </form>
+                    <% } %>
+      </div>
+    </aside>
+
+    <section class="profile-content">
+
+      <div class="settings-panel active" id="personal">
+        <h2>Personal Information</h2>
+        <p>Manage your personal account information.</p>
+
+        <div class="profile-info">
+          <div class="info-item">
+            <label>Full Name</label>
+            <p><%= user ? user.name : '' %></p>
+          </div>
+
+           <div class="info-item">
+            <label>username</label>
+            <p><%= user ? user.userName : '' %></p>
+          </div>
+
+          <div class="info-item">
+            <label>Email Address</label>
+            <p><%= user ? user.email : '' %></p>
+          </div>
+
+           <div class="info-item">
+            <label>Phone Number</label>
+            <p><%= user ? user.phoneNumber : '' %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-panel" id="security">
+        <h2>Security & Privacy</h2>
+        <p>Manage your account security and privacy settings.</p>
+
+        <div class="settings-card">
+          <h3>Password</h3>
+          <p>Keep your account secure by updating your password.</p>
+          <a href="/change-password">Change Password</a>
+        </div>
+
+        <div class="settings-card">
+          <h3>Account Security</h3>
+          <p>Review your account security settings.</p>
+        </div>
+      </div>
+
+      <div class="settings-panel" id="interface">
+        <h2>App Interface</h2>
+        <p>Customize your application experience.</p>
+
+        <div class="settings-card">
+          <h3>Appearance</h3>
+          <p>Customize how the application looks.</p>
+        </div>
+      </div>
+
+      <div class="settings-panel" id="support">
+        <h2>Help & Support</h2>
+        <p>Need help? Get assistance with your account.</p>
+
+        <div class="settings-card">
+          <h3>Contact Support</h3>
+          <p>Reach out to our support team for assistance.</p>
+        </div>
+      </div>
+
+      <div class="settings-panel" id="privacy">
+        <h2>Privacy Policy</h2>
+        <p>Read about how we collect, use and protect your information.</p>
+      </div>
+
+      <div class="settings-panel" id="terms">
+        <h2>Terms & Conditions</h2>
+        <p>Review the terms and conditions for using our platform.</p>
+      </div>
+
+      <div class="settings-panel" id="about">
+        <h2>About</h2>
+        <p>Learn more about Zeal Data.</p>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    const settingsLinks = document.querySelectorAll('.settings-link');
+    const settingsPanels = document.querySelectorAll('.settings-panel');
+
+    settingsLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        settingsLinks.forEach(item => item.classList.remove('active'));
+        settingsPanels.forEach(panel => panel.classList.remove('active'));
+
+        link.classList.add('active');
+
+        document.getElementById(link.dataset.tab).classList.add('active');
+      });
+    });
+  </script>
+
+  <%- include('../includes/end.ejs') %>
+</body>

@@ -1,0 +1,21 @@
+<!-- <script src="/js/main.js"></script> -->
+<script>
+    let inactivityTimer;
+
+    function resetInactivityTimer() {
+        clearTimeout(inactivityTimer);
+
+        inactivityTimer = setTimeout(() => {
+            window.location.href = '/login';
+        }, 60 * 1000);
+    }
+
+    ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(event => {
+        document.addEventListener(event, resetInactivityTimer);
+    });
+
+    resetInactivityTimer();
+</script>
+</body>
+
+</html>

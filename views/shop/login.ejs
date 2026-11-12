@@ -1,0 +1,76 @@
+<%- include('../includes/head.ejs') %>
+<link rel="stylesheet" href="/css/login.css">
+</head>
+
+<body>
+    <%- include('../includes/nav.ejs') %>
+
+    <main class="auth-container">
+          <% if (errorMessage) { %>
+            <div class="auth-alert" id="authAlert">
+                <div class="alert-icon">!</div>
+
+                <div class="alert-content">
+                    <h4>Login unsuccessful</h4>
+                    <p><%= errorMessage %></p>
+                </div>
+
+                <button type="button" class="alert-close" onclick="closeAuthAlert()">
+                    &times;
+                </button>
+
+                <div class="alert-progress"></div>
+            </div>
+        <% } %>
+
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Welcome Back</h1>
+                <p>Login to your account to continue.</p>
+            </div>
+
+            <form class="login-form" action="/login" method="POST">
+                <div class="form-control">
+                    <label for="email">E-Mail</label>
+                    <input type="email" name="email" id="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-control">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password" placeholder="Enter your password" required>
+                </div>
+
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                <div class="forgot-password">
+                    <a href="/reset">Forgot password?</a>
+                </div>
+
+                <button class="btn login-btn" type="submit">Login</button>
+            </form>
+
+            <p class="auth-footer">
+                Don't have an account? <a href="/signup">Register</a>
+            </p>
+        </div>
+    </main>
+
+    <script>
+    const alertBox = document.getElementById('authAlert');
+
+    function closeAuthAlert() {
+        if (!alertBox) return;
+
+        alertBox.classList.add('hide');
+
+        setTimeout(() => {
+            alertBox.remove();
+        }, 300);
+    }
+
+    if (alertBox) {
+        setTimeout(closeAuthAlert, 5000);
+    }
+</script>
+
+    <%- include('../includes/end.ejs') %>

@@ -1,0 +1,263 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #f5f7fb;
+    color: #202938;
+}
+
+.profile-container {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 24px;
+    max-width: 1250px;
+    margin: 45px auto;
+    padding: 0 25px;
+    align-items: start;
+}
+
+.profile-sidebar {
+    background: #ffffff;
+    border: 1px solid #edf0f5;
+    border-radius: 16px;
+    padding: 26px 18px;
+    display: flex;
+    flex-direction: column;
+    min-height: 620px;
+    box-shadow: 0 4px 20px rgba(20, 35, 60, 0.03);
+}
+
+.sidebar-heading {
+    padding: 5px 12px 25px;
+    border-bottom: 1px solid #f0f1f4;
+}
+
+.sidebar-heading h2 {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.6px;
+    margin: 0 0 7px;
+    color: #172033;
+}
+
+.sidebar-heading p {
+    font-size: 12px;
+    font-weight: 400;
+    color: #929baa;
+    margin: 0;
+}
+
+.settings-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 24px;
+}
+
+.settings-link {
+    width: 100%;
+    padding: 14px 13px;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: #687386;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.settings-link:hover {
+    background: #f5f7ff;
+    color: #315ee8;
+}
+
+.settings-link.active {
+    background: #edf2ff;
+    color: #315ee8;
+    font-weight: 600;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 22px 12px 5px;
+    border-top: 1px solid #f0f1f4;
+}
+
+.logout-link {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #e04c55;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.logout-link:hover {
+    color: #bd303a;
+}
+
+.profile-content {
+    background: #ffffff;
+    border: 1px solid #edf0f5;
+    border-radius: 16px;
+    padding: 38px;
+    min-height: 620px;
+    box-shadow: 0 4px 20px rgba(20, 35, 60, 0.03);
+}
+
+.settings-panel {
+    display: none;
+    animation: fadeIn 0.25s ease;
+}
+
+.settings-panel.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.settings-panel h2 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.8px;
+    color: #172033;
+    margin: 0 0 10px;
+}
+
+.settings-panel > p {
+    color: #8993a3;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.7;
+    margin: 0 0 32px;
+}
+
+.profile-info {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 30px;
+}
+
+.info-item {
+    padding: 23px;
+    background: #f8f9fc;
+    border: 1px solid #f0f1f5;
+    border-radius: 12px;
+}
+
+.info-item label {
+    display: block;
+    color: #929baa;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.info-item p {
+    color: #263247;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    word-break: break-word;
+}
+
+.settings-card {
+    background: #ffffff;
+    border: 1px solid #edf0f5;
+    border-radius: 12px;
+    padding: 23px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s ease;
+}
+
+.settings-card:hover {
+    border-color: #cbd6f5;
+}
+
+.settings-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #263247;
+    margin: 0 0 9px;
+}
+
+.settings-card p {
+    font-size: 12px;
+    line-height: 1.7;
+    color: #929baa;
+    margin: 0 0 16px;
+}
+
+.settings-card a {
+    color: #315ee8;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.settings-card a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin: 25px auto;
+        padding: 0 15px;
+    }
+
+    .profile-sidebar {
+        min-height: auto;
+        padding: 20px 14px;
+    }
+
+    .settings-menu {
+        gap: 4px;
+    }
+
+    .sidebar-footer {
+        margin-top: 20px;
+    }
+
+    .profile-content {
+        min-height: 400px;
+        padding: 25px 20px;
+    }
+
+    .profile-info {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 400px) {
+    .profile-content {
+        padding: 22px 15px;
+    }
+
+    .settings-panel h2 {
+        font-size: 19px;
+    }
+
+    .settings-link {
+        font-size: 12px;
+    }
+}

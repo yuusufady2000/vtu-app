@@ -1,0 +1,21 @@
+.account-dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 180px;
+  z-index: 1000;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  padding: 8px 0;
+}
+
+.account-dropdown:hover .dropdown-menu,
+.account-dropdown:focus-within .dropdown-menu {
+  display: block;
+}

@@ -1,0 +1,121 @@
+<%- include("../includes/head.ejs") %>
+<link rel="stylesheet" href="/css/dash.css">
+</head>
+<body>
+    <%- include("../includes/nav.ejs") %>
+
+    <main class="dashboard-container">
+        <section class="welcome-section">
+            <div>
+                <p class="welcome-label">DASHBOARD</p>
+                <h2>Welcome, <%= user.userName %></h2>
+                <p class="welcome-description">Manage your transactions and services from one place.</p>
+            </div>
+        </section>
+
+        <section class="balance-container">
+            <div class="balance-card wallet-balance">
+                <div class="balance-top">
+                    <div class="balance-icon">₦</div>
+                    <span>WALLET BALANCE</span>
+                </div>
+                <p class="balance-amount">₦0.00</p>
+                <a href="/account/wallet" class="balance-action">Fund Wallet
+            </div>
+
+            <div class="balance-card commission-balance">
+                <div class="balance-top">
+                    <div class="balance-icon">↗</div>
+                    <span>COMMISSION BALANCE</span>
+                </div>
+                <p class="balance-amount">₦0.00</p>
+                <a href="/account/commission" class="balance-action">Withdraw Commission <span>→</span></a>
+            </div>
+        </section>
+
+        <section class="services-section">
+            <div class="section-heading">
+                <div>
+                    <h3>Our Services</h3>
+                    <p>Choose a service to get started.</p>
+                </div>
+                <span class="services-count">12 SERVICES</span>
+            </div>
+
+            <div class="services-grid">
+                <a class="service-link airtime-link" href="/">
+                    <span class="service-icon">📱</span>
+                    <span class="service-name">Buy Airtime</span>
+                    <span class="service-arrow">→</span>
+                </a>
+
+                <a class="service-link data-link" href="/">
+                    <span class="service-icon">🌐</span>
+                    <span class="service-name">Buy Data</span>
+                    <span class="service-arrow">→</span>
+                </a>
+
+                <a class="service-link tv-link" href="/">
+                    <span class="service-icon">📺</span>
+                    <span class="service-name">TV Subscription</span>
+                    <span class="service-arrow">→</span>
+                </a>
+
+                <a class="service-link electricity-link" href="/">
+                    <span class="service-icon">⚡</span>
+                    <span class="service-name">Electricity Bills</span>
+                    <span class="service-arrow">→</span>
+                </a>
+
+                <a class="service-link education-link" href="/">
+                    <span class="service-icon">🎓</span>
+                    <span class="service-name">Education</span>
+                    <span class="service-arrow">→</span>
+                </a>
+
+                <a class="service-link airtime-pins-link" href="/">
+                    <span class="service-icon">🎫</span>
+                    <span class="service-name">Airtime Pins</span>
+                    <span class="service-arrow">→</span>
+                </a>
+
+                <a class="service-link data-pins-link" href="/">
+                    <span class="service-icon">💳</span>
+                    <span class="service-name">Data Pins</span>
+                    <span class="service-arrow">→</span>
+                </a>
+
+                <a class="service-link bulk-sms-link" href="/">
+                    <span class="service-icon">✉️</span>
+                    <span class="service-name">Bulk SMS</span>
+                    <span class="service-arrow">→</span>
+                </a>
+
+                <a class="service-link bulk-orders-link" href="/">
+                    <span class="service-icon">📦</span>
+                    <span class="service-name">Bulk Orders</span>
+                    <span class="service-arrow">→</span>
+                </a>
+
+                <a class="service-link airtime-swap-link" href="/">
+                    <span class="service-icon">🔄</span>
+                    <span class="service-name">Airtime Swap</span>
+                    <span class="service-arrow">→</span>
+                </a>
+
+                <a class="service-link pricing-link" href="/">
+                    <span class="service-icon">🏷️</span>
+                    <span class="service-name">Pricing</span>
+                    <span class="service-arrow">→</span>
+                </a>
+
+                <a class="service-link sales-analysis-link" href="/">
+                    <span class="service-icon">📊</span>
+                    <span class="service-name">Sales Analysis</span>
+                    <span class="service-arrow">→</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <%- include('../includes/end.ejs') %>
