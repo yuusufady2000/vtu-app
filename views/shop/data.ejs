@@ -1,0 +1,133 @@
+
+<%- include('../includes/head.ejs') %>
+<link rel="stylesheet" href="/css/data.css">
+</head>
+
+<body>
+    <%- include('../includes/nav.ejs') %>
+
+    <main class="data-container">
+        <section class="data-header">
+            <h1>Buy Data</h1>
+            <p>Select a service and explore available data plans.</p>
+        </section>
+
+        <section class="data-card">
+            <form id="data-form">
+                <input
+                    type="hidden"
+                    id="csrf-token"
+                    value="<%= csrfToken %>"
+                >
+
+                <label for="service-id">Service ID</label>
+
+                <input
+                    type="number"
+                    id="service-id"
+                    placeholder="Enter service ID"
+                    min="1"
+                    required
+                >
+
+                <button type="submit" id="fetch-button">
+                    Fetch Data Plans
+                </button>
+            </form>
+
+            <p id="message"></p>
+        </section>
+
+        <section class="plans-section">
+            <h2>Available Data Plans</h2>
+            <div id="plans-container" class="plans-container">
+                <p class="empty-message">Your available plans will appear here.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const form = document.getElementById('data-form');
+        const serviceInput = document.getElementById('service-id');
+        const button = document.getElementById('fetch-button');
+        const message = document.getElementById('message');
+        const plansContainer = document.getElementById('plans-container');
+        const csrfToken = document.getElementById('csrf-token').value;
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const serviceId = serviceInput.value.trim();
+
+            if (!serviceId || Number(serviceId) <= 0) {
+                message.textContent = 'Enter a valid service ID.';
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = 'Loading...';
+            message.textContent = '';
+            plansContainer.replaceChildren();
+
+            try {
+                const response = await fetch('/fetch-data-plans', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        service_id: serviceId,
+                        _csrf: csrfToken
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.status) {
+                    throw new Error(result.message || 'Unable to fetch plans.');
+                }
+
+                const plans = result.data?.data_plans || [];
+
+                if (!plans.length) {
+                    message.textContent = 'No data plans were found.';
+                    return;
+                }
+
+                plans.forEach(plan => {
+                    const card = document.createElement('article');
+                    card.className = 'plan-card';
+
+                    const name = document.createElement('h3');
+                    name.textContent = plan.name;
+
+                    const price = document.createElement('p');
+                    price.textContent = `₦${Number(plan.price).toLocaleString()}`;
+
+                    const validity = document.createElement('p');
+                    validity.textContent = `${plan.validity_days ?? 'N/A'} days validity`;
+
+                    const network = document.createElement('p');
+                    network.textContent = `Network: ${plan.network_name || 'N/A'}`;
+
+                    const reliability = document.createElement('p');
+                    reliability.textContent = plan.delivery_rate == null
+                        ? 'Delivery history unavailable'
+                        : `Delivery rate: ${plan.delivery_rate}%`;
+
+                    card.append(name, price, validity, network, reliability);
+                    plansContainer.appendChild(card);
+                });
+
+                message.textContent = 'Data plans fetched successfully.';
+
+            } catch (error) {
+                message.textContent = error.message;
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Fetch Data Plans';
+            }
+        });
+    </script>
+</body>
+</html>

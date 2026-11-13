@@ -13,7 +13,8 @@ exports.getLogin = (req, res, next) => {
     path: '/login',
     pageTitle: 'Login',
     errorMessage: errorMessages.length ? errorMessages[0] : null,
-    successMessage: successMessages.length ? successMessages[0] : null
+    successMessage: successMessages.length ? successMessages[0] : null,
+    isAuthenticated: false
   });
 };
 
