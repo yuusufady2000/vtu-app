@@ -18,10 +18,18 @@
             appId: "a3a860a6-959b-4d04-b89e-4ab1ed7e6a7a"
         });
 
-        const externalId = <%- JSON.stringify(oneSignalUserId || null) %>;
+        const externalId = <%- JSON.stringify(typeof oneSignalUserId !== 'undefined' ? oneSignalUserId : null) %>;
 
         if (externalId) {
             await OneSignal.login(externalId);
+        }
+
+        const button = document.getElementById("enableNotifications");
+
+        if (button) {
+            button.addEventListener("click", async () => {
+                await OneSignal.Notifications.requestPermission();
+            });
         }
     });
 </script>
