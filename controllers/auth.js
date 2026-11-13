@@ -69,7 +69,7 @@ exports.postLogin = (req, res, next) => {
                 const result = await sendPushNotification({
                   externalId: user._id.toString(),
                   title: "New Login to Zeal Data",
-                  message: "Your Zeal Data account was successfully accessed."
+                  message: `Your Zeal Data account was successfully accessed. ${user.email}`
                 });
 
                 console.log("OneSignal login notification result:", result);
@@ -273,15 +273,15 @@ exports.postResetPassword = (req, res, next) => {
   const token = req.body.passwordToken;
   const userId = req.body.userId;
 
-  if (!newPassword || newPassword !== confirmPassword) {
-    req.flash('error', 'Passwords do not match.');
-    return res.redirect(`/reset/${token}`);
-  }
+  // if (!newPassword || newPassword !== confirmPassword) {
+  //   req.flash('error', 'Passwords do not match.');
+  //   return res.redirect(`/reset/${token}`);
+  // }
 
-  if (newPassword.length < 8) {
-    req.flash('error', 'Password must contain at least 8 characters.');
-    return res.redirect(`/reset/${token}`);
-  }
+  // if (newPassword.length < 8) {
+  //   req.flash('error', 'Password must contain at least 8 characters.');
+  //   return res.redirect(`/reset/${token}`);
+  // }
 
   User.findOne({
     _id: userId,
