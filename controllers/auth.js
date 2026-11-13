@@ -4,6 +4,8 @@ const { validationResult } = require('express-validator');
 const User = require('../models/user');
 const crypto = require('crypto');
 const sendMail = require('../util/sendgrid');
+const { sendPushNotification } = require("../util/onesignal");
+
 
 exports.getLogin = (req, res, next) => {
   const errorMessages = req.flash('error');
@@ -29,6 +31,7 @@ exports.getSignup = (req, res, next) => {
     successMessage: successMessages.length ? successMessages[0] : null
   });
 };
+
 
 exports.postLogin = (req, res, next) => {
   const email = req.body.email?.trim().toLowerCase();
@@ -59,8 +62,20 @@ exports.postLogin = (req, res, next) => {
             req.session.isLoggedIn = true;
             req.session.user = user;
 
-            req.session.save(err => {
+            req.session.save(async err => {
               if (err) return next(err);
+
+              try {
+                const result = await sendPushNotification({
+                  externalId: user._id.toString(),
+                  title: "New Login to Zeal Data",
+                  message: "Your Zeal Data account was successfully accessed."
+                });
+
+                console.log("OneSignal login notification result:", result);
+              } catch (error) {
+                console.error("OneSignal login notification error:", error);
+              }
 
               res.redirect('/index');
             });
@@ -69,6 +84,8 @@ exports.postLogin = (req, res, next) => {
     })
     .catch(err => next(err));
 };
+
+
 
 exports.postSignup = (req, res, next) => {
   const name = req.body.name?.trim();
