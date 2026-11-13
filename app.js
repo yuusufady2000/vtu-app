@@ -15,7 +15,7 @@ const User = require("./models/user");
 const auth = require("./routes/auth");
 const errorController = require("./controllers/error");
 const shopRoutes = require("./routes/shopRoutes");
-const vtu_apiRoutes = require('./routes/services')
+const vtu_apiRoutes = require("./routes/services");
 
 const PORT = process.env.PORT || 3000;
 const MONGODB_URL = process.env.MONGODB_URL;
@@ -71,6 +71,15 @@ const {
 });
 
 app.use(csrfSynchronisedProtection);
+
+app.use((req, res, next) => {
+    res.locals.oneSignalUserId =
+        req.session?.isLoggedIn && req.session?.user?._id
+            ? req.session.user._id.toString()
+            : null;
+
+    next();
+});
 
 app.use((req, res, next) => {
     if (!req.session.user?._id) {
