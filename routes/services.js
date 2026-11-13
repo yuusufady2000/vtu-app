@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
-const vtugateController = require('../controllers/vtugate');
+const vtugateController = require('../controllers/services');
 
-router.get('/buy-data', vtugateController.getDataPage);
+const isAuth = require('../middleware/isAuth')
 
-router.post('/fetch-data-plans', vtugateController.getDataPlans);
+router.get('/buy-data',isAuth, vtugateController.getDataPage);
+
+router.post('/fetch-data-plans',isAuth, vtugateController.getDataPlans);
 
 module.exports = router;
