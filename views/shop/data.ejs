@@ -1,5 +1,6 @@
 
 <%- include('../includes/head.ejs') %>
+<link rel="stylesheet" href="/css/dash.css">
 </head>
 
 <body>
@@ -8,7 +9,7 @@
     <main class="data-container">
         <section class="data-header">
             <h1>Buy Data</h1>
-            <p>Select a service and explore available data plans.</p>
+            <p>Select your network and explore available data plans.</p>
         </section>
 
         <section class="data-card">
@@ -19,28 +20,44 @@
                     value="<%= csrfToken %>"
                 >
 
-                <label for="service-id">Service ID</label>
+                <label for="service-id">Select Network</label>
 
-                <input
-                    type="number"
-                    id="service-id"
-                    placeholder="Enter service ID"
-                    min="1"
-                    required
+                <select id="service-id" required>
+                    <option value="">Choose a network</option>
+
+                    <% if (dataServices && dataServices.length > 0) { %>
+                        <% dataServices.forEach(service => { %>
+                            <option value="<%= service.service_id %>">
+                                <%= service.network_name.toUpperCase() %>
+                                <% if (service.data_type) { %>
+                                    - <%= service.data_type.toUpperCase() %>
+                                <% } %>
+                            </option>
+                        <% }) %>
+                    <% } %>
+                </select>
+
+                <button
+                    type="submit"
+                    id="fetch-button"
+                    <%= !dataServices || !dataServices.length ? 'disabled' : '' %>
                 >
-
-                <button type="submit" id="fetch-button">
                     Fetch Data Plans
                 </button>
             </form>
 
-            <p id="message"></p>
+            <p id="message" role="status">
+                <%= typeof errorMessage !== 'undefined' ? errorMessage : '' %>
+            </p>
         </section>
 
         <section class="plans-section">
             <h2>Available Data Plans</h2>
+
             <div id="plans-container" class="plans-container">
-                <p class="empty-message">Your available plans will appear here.</p>
+                <p class="empty-message">
+                    Your available plans will appear here.
+                </p>
             </div>
         </section>
     </main>
@@ -56,10 +73,10 @@
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            const serviceId = serviceInput.value.trim();
+            const serviceId = serviceInput.value;
 
             if (!serviceId || Number(serviceId) <= 0) {
-                message.textContent = 'Enter a valid service ID.';
+                message.textContent = 'Please select a network.';
                 return;
             }
 
@@ -83,7 +100,9 @@
                 const result = await response.json();
 
                 if (!response.ok || !result.status) {
-                    throw new Error(result.message || 'Unable to fetch plans.');
+                    throw new Error(
+                        result.message || 'Unable to fetch data plans.'
+                    );
                 }
 
                 const plans = result.data?.data_plans || [];
@@ -98,23 +117,34 @@
                     card.className = 'plan-card';
 
                     const name = document.createElement('h3');
-                    name.textContent = plan.name;
+                    name.textContent = plan.name || 'Data Plan';
 
                     const price = document.createElement('p');
-                    price.textContent = `₦${Number(plan.price).toLocaleString()}`;
+                    price.textContent =
+                        `₦${Number(plan.price).toLocaleString()}`;
 
                     const validity = document.createElement('p');
-                    validity.textContent = `${plan.validity_days ?? 'N/A'} days validity`;
+                    validity.textContent =
+                        `${plan.validity_days ?? 'N/A'} days validity`;
 
                     const network = document.createElement('p');
-                    network.textContent = `Network: ${plan.network_name || 'N/A'}`;
+                    network.textContent =
+                        `Network: ${plan.network_name || 'N/A'}`;
 
                     const reliability = document.createElement('p');
-                    reliability.textContent = plan.delivery_rate == null
-                        ? 'Delivery history unavailable'
-                        : `Delivery rate: ${plan.delivery_rate}%`;
+                    reliability.textContent =
+                        plan.delivery_rate == null
+                            ? 'Delivery history unavailable'
+                            : `Delivery rate: ${plan.delivery_rate}%`;
 
-                    card.append(name, price, validity, network, reliability);
+                    card.append(
+                        name,
+                        price,
+                        validity,
+                        network,
+                        reliability
+                    );
+
                     plansContainer.appendChild(card);
                 });
 
@@ -128,5 +158,6 @@
             }
         });
     </script>
-</body>
-</html>
+
+    <%- include('../includes/end.ejs') %>
+
