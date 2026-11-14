@@ -66,15 +66,19 @@ exports.postLogin = (req, res, next) => {
               if (err) return next(err);
 
               try {
-                const result = await sendPushNotification({
-                  externalId: user._id.toString(),
+                const result = await sendEmailNotification({
+                  email: user.email,
                   title: "New Login to Zeal Data",
-                  message: `Your Zeal Data account was successfully accessedio. ${user.email}`
+                  message: `
+                    <h2>New Login detected</h2>
+                    <p>Your Zeal Data account was successfully accessed.</p>
+                    <p>Email: ${user.email}</p>
+                  `
                 });
 
-                console.log("OneSignal login notification result:", result);
+                console.log("OneSignal login email result:", result);
               } catch (error) {
-                console.error("OneSignal login notification error:", error);
+                console.error("OneSignal login email error:", error);
               }
 
               res.redirect('/index');
@@ -84,7 +88,6 @@ exports.postLogin = (req, res, next) => {
     })
     .catch(err => next(err));
 };
-
 
 
 exports.postSignup = (req, res, next) => {

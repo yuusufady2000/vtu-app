@@ -1,7 +1,7 @@
 
 const crypto = require("crypto");
 
-exports.sendPushNotification = async ({
+exports.sendEmailNotification = async ({
     externalId,
     title,
     message,
@@ -24,22 +24,18 @@ exports.sendPushNotification = async ({
         include_aliases: {
             external_id: [String(externalId)]
         },
-        target_channel: "push",
-        headings: {
-            en: title
-        },
-        contents: {
-            en: message
-        },
+        target_channel: "email",
+        email_subject: title,
+        email_body: message,
         idempotency_key: crypto.randomUUID()
     };
 
     if (data) {
-        payload.data = data;
+        payload.custom_data = data;
     }
 
     const response = await fetch(
-        "https://api.onesignal.com/notifications?c=push",
+        "https://api.onesignal.com/notifications?c=email",
         {
             method: "POST",
             headers: {
@@ -56,14 +52,14 @@ exports.sendPushNotification = async ({
         throw new Error(
             result.errors
                 ? JSON.stringify(result.errors)
-                : "OneSignal notification request failed"
+                : "OneSignal email request failed"
         );
     }
 
     if (!result.id) {
         return {
             sent: false,
-            errors: result.errors || "No subscribed recipient found"
+            errors: result.errors || "No subscribed email recipient found"
         };
     }
 
