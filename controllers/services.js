@@ -1,3 +1,6 @@
+
+const vtugate = require('../util/vtugate');
+
 exports.getDataPlans = async (req, res, next) => {
     try {
         const serviceId = Number(req.body.service_id);
