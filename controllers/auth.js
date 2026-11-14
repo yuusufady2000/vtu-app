@@ -4,7 +4,7 @@ const { validationResult } = require('express-validator');
 const User = require('../models/user');
 const crypto = require('crypto');
 const sendMail = require('../util/sendgrid');
-const { sendPushNotification } = require("../util/onesignal");
+const { sendEmailNotification } = require("../util/onesignal");
 
 
 exports.getLogin = (req, res, next) => {
