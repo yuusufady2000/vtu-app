@@ -42,7 +42,7 @@ exports.postLogin = (req, res, next) => {
   User.findOne({ email })
     .then(user => {
       if (!user) {
-        req.flash('error', 'Invalid email or password.');
+        req.flash('error', 'Account not found.');
         return res.redirect('/login');
       }
 
@@ -65,8 +65,8 @@ exports.postLogin = (req, res, next) => {
               sendMail({
                 to: user.email,
                 from: process.env.SENDGRID_EMAIL,
-                subject: 'New Login to Zeal Data',
-                text: `Hello ${user.name || 'User'}, your Zeal Data account was successfully logged into.`,
+                subject: 'New Login detected',
+                text: `Hello ${user.name || 'User'}`,
                 html: `
                   <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
                     <h2>New Login to Zeal Data</h2>
