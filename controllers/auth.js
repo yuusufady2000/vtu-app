@@ -69,7 +69,7 @@ exports.postLogin = (req, res, next) => {
                 const result = await sendPushNotification({
                   externalId: user._id.toString(),
                   title: "New Login to Zeal Data",
-                  message: `Your Zeal Data account was successfully accessed. ${user.email}`
+                  message: `Your Zeal Data account was successfully accessedio. ${user.email}`
                 });
 
                 console.log("OneSignal login notification result:", result);
