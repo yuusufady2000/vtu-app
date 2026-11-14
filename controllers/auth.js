@@ -47,7 +47,7 @@ exports.postLogin = (req, res, next) => {
         .lean()
         .then(user => {
             if (!user) {
-                req.flash('error', 'Invalid email or password.');
+                req.flash('error', 'Account not found');
                 return null;
             }
 
@@ -59,23 +59,22 @@ exports.postLogin = (req, res, next) => {
                     }
 
                     return new Promise((resolve, reject) => {
-                        req.session.regenerate(err => {
-                            if (err) return reject(err);
+                       req.session.regenerate(err => {
+    if (err) {
+        return next(err);
+    }
 
-                            req.session.isLoggedIn = true;
+    req.session.userId = user._id.toString();
+    req.session.isLoggedIn = true;
 
-                            req.session.user = {
-                                _id: user._id.toString(),
-                                name: user.name,
-                                userName: user.userName,
-                                email: user.email
-                            };
+    req.session.save(err => {
+        if (err) {
+            return next(err);
+        }
 
-                            req.session.save(err => {
-                                if (err) return reject(err);
-                                resolve(user);
-                            });
-                        });
+        res.redirect("/index");
+    });
+});
                     });
                 });
         })

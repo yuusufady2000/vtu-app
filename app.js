@@ -40,7 +40,9 @@ app.use(cookieParser());
 
 const store = MongoStore.create({
     mongoUrl: MONGODB_URL,
-    collectionName: "sessions"
+    collectionName: "sessions",
+    ttl: 20 * 60 * 60,
+    autoRemove: "native"
 });
 
 app.use(session({
@@ -73,21 +75,44 @@ const {
 app.use(csrfSynchronisedProtection);
 
 app.use((req, res, next) => {
-    res.locals.oneSignalUserId =
-        req.session?.isLoggedIn && req.session?.user?._id
-            ? req.session.user._id.toString()
-            : null;
-
-    next();
-});
-
-app.use((req, res, next) => {
-    if (!req.session.user?._id) {
+    if (!req.session.isLoggedIn) {
         return next();
     }
 
-    User.findById(req.session.user._id)
+    const userId = req.session.userId || req.session.user?._id;
+
+    if (!userId) {
+        return req.session.destroy(err => {
+            if (err) return next(err);
+
+            res.clearCookie("zeal.sid", {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                path: "/"
+            });
+
+            next();
+        });
+    }
+
+    User.findById(userId)
         .then(user => {
+            if (!user) {
+                return req.session.destroy(err => {
+                    if (err) return next(err);
+
+                    res.clearCookie("zeal.sid", {
+                        httpOnly: true,
+                        secure: process.env.NODE_ENV === "production",
+                        sameSite: "lax",
+                        path: "/"
+                    });
+
+                    next();
+                });
+            }
+
             req.user = user;
             next();
         })
@@ -96,8 +121,13 @@ app.use((req, res, next) => {
 
 app.use((req, res, next) => {
     res.locals.csrfToken = generateToken(req);
-    res.locals.isAuthenticated = !!req.session.isLoggedIn;
+    res.locals.isAuthenticated = !!req.user;
     res.locals.user = req.user || null;
+
+    res.locals.oneSignalUserId = req.user
+        ? req.user._id.toString()
+        : null;
+
     next();
 });
 
