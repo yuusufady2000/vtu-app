@@ -1,10 +1,11 @@
 
 const crypto = require("crypto");
 
-exports.sendEmailNotification = async ({
-    email,
+exports.sendPushNotification = async ({
+    externalId,
     title,
-    message
+    message,
+    data
 }) => {
     if (!process.env.ONESIGNAL_APP_ID) {
         throw new Error("ONESIGNAL_APP_ID is missing");
@@ -14,20 +15,31 @@ exports.sendEmailNotification = async ({
         throw new Error("ONESIGNAL_REST_API_KEY is missing");
     }
 
-    if (!email || !title || !message) {
-        throw new Error("Email, title and message are required");
+    if (!externalId || !title || !message) {
+        throw new Error("External ID, title and message are required");
     }
 
     const payload = {
         app_id: process.env.ONESIGNAL_APP_ID,
-        email_to: [email],
-        email_subject: title,
-        email_body: message,
+        include_aliases: {
+            external_id: [String(externalId)]
+        },
+        target_channel: "push",
+        headings: {
+            en: title
+        },
+        contents: {
+            en: message
+        },
         idempotency_key: crypto.randomUUID()
     };
 
+    if (data) {
+        payload.data = data;
+    }
+
     const response = await fetch(
-        "https://api.onesignal.com/notifications?c=email",
+        "https://api.onesignal.com/notifications?c=push",
         {
             method: "POST",
             headers: {
@@ -44,14 +56,14 @@ exports.sendEmailNotification = async ({
         throw new Error(
             result.errors
                 ? JSON.stringify(result.errors)
-                : "OneSignal email request failed"
+                : "OneSignal notification request failed"
         );
     }
 
     if (!result.id) {
         return {
             sent: false,
-            errors: result.errors || "No email recipient found"
+            errors: result.errors || "No subscribed recipient found"
         };
     }
 

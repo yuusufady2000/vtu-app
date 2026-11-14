@@ -4,8 +4,6 @@ const { validationResult } = require('express-validator');
 const User = require('../models/user');
 const crypto = require('crypto');
 const sendMail = require('../util/sendgrid');
-const { sendEmailNotification } = require("../util/onesignal");
-
 
 exports.getLogin = (req, res, next) => {
   const errorMessages = req.flash('error');
@@ -31,7 +29,6 @@ exports.getSignup = (req, res, next) => {
     successMessage: successMessages.length ? successMessages[0] : null
   });
 };
-
 
 exports.postLogin = (req, res, next) => {
   const email = req.body.email?.trim().toLowerCase();
@@ -62,26 +59,32 @@ exports.postLogin = (req, res, next) => {
             req.session.isLoggedIn = true;
             req.session.user = user;
 
-            req.session.save(async err => {
+            req.session.save(err => {
               if (err) return next(err);
 
-              try {
-                const result = await sendEmailNotification({
-                  email: user.email,
-                  title: "New Login to Zeal Data",
-                  message: `
-                    <h2>New Login detected</h2>
-                    <p>Your Zeal Data account was successfully accessed.</p>
-                    <p>Email: ${user.email}</p>
-                  `
+              sendMail({
+                to: user.email,
+                from: process.env.SENDGRID_EMAIL,
+                subject: 'New Login to Zeal Data',
+                text: `Hello ${user.name || 'User'}, your Zeal Data account was successfully logged into.`,
+                html: `
+                  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
+                    <h2>New Login to Zeal Data</h2>
+                    <p>Hello ${user.name || 'User'},</p>
+                    <p>Your Zeal Data account was successfully logged into.</p>
+                    <p>If this wasn't you, please reset your password and contact support.</p>
+                    <p>Thank you for using Zeal Data.</p>
+                  </div>
+                `
+              })
+                .then(() => {
+                  console.log('Login notification email sent.');
+                  res.redirect('/index');
+                })
+                .catch(error => {
+                  console.error('Login notification email failed:', error.message);
+                  res.redirect('/index');
                 });
-
-                console.log("OneSignal login email result:", result);
-              } catch (error) {
-                console.error("OneSignal login email error:", error);
-              }
-
-              res.redirect('/index');
             });
           });
         });
@@ -276,15 +279,15 @@ exports.postResetPassword = (req, res, next) => {
   const token = req.body.passwordToken;
   const userId = req.body.userId;
 
-  // if (!newPassword || newPassword !== confirmPassword) {
-  //   req.flash('error', 'Passwords do not match.');
-  //   return res.redirect(`/reset/${token}`);
-  // }
+  if (!newPassword || newPassword !== confirmPassword) {
+    req.flash('error', 'Passwords do not match.');
+    return res.redirect(`/reset/${token}`);
+  }
 
-  // if (newPassword.length < 8) {
-  //   req.flash('error', 'Password must contain at least 8 characters.');
-  //   return res.redirect(`/reset/${token}`);
-  // }
+  if (newPassword.length < 8) {
+    req.flash('error', 'Password must contain at least 8 characters.');
+    return res.redirect(`/reset/${token}`);
+  }
 
   User.findOne({
     _id: userId,
