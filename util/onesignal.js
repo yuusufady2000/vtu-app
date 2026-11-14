@@ -1,4 +1,4 @@
-```js
+
 const crypto = require("crypto");
 
 exports.sendEmailNotification = async ({
@@ -61,4 +61,3 @@ exports.sendEmailNotification = async ({
         errors: result.errors || null
     };
 };
-```
