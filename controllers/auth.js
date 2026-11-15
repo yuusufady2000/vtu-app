@@ -250,7 +250,7 @@ exports.postForgotPassword = (req, res, next) => {
                     return null;
                 }
 
-             user.resetToken = tokenHash;
+             user.resetToken = token;
                user.resetExpire = Date.now() + 3600000;
                   return user.save()
                     .then(() => sendMail({
@@ -281,11 +281,11 @@ const token = req.params.token;
   .then(user => {
       res.render('shop/forgot-password', {
     path:'/forgot-password',
-    pageTitle:'Passwword reset',
+    pageTitle:'Password reset',
     userId: user._id.toString(),
     passwordToken:token,
      errorMessage: errorMessages.length ? errorMessages[0] : null,
-        successMessage: successMessages.length ? successMessages[0] : null,
+    successMessage: successMessages.length ? successMessages[0] : null,
   })
   })
   .catch(err => {
