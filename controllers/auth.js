@@ -37,7 +37,6 @@ exports.getSignup = (req, res, next) => {
     .then(user => {
       if (!user) {
         req.flash('error', 'Account not found')
-        return res.redirect('/login');
       }
       bcrypt
         .compare(password, user.password)
