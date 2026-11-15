@@ -217,8 +217,8 @@ exports.getReset = (req,res,next) => {
      const errorMessages = req.flash('error');
     const successMessages = req.flash('success');
 
-      res.render('shop/forgot-password', {
-    path:'/forgot-password',
+      res.render('shop/password', {
+    path:'/password',
     pageTitle:'Reset Password',
      errorMessage: errorMessages.length ? errorMessages[0] : null,
         successMessage: successMessages.length ? successMessages[0] : null,
@@ -279,8 +279,8 @@ exports.getPassword = (req, res, next) => {
 const token = req.params.token;
   User.findOne({resetToken: token, resetExpire: {$gt: Date.now()}})
   .then(user => {
-      res.render('shop/password', {
-    path:'/password',
+      res.render('shop/forgot-password', {
+    path:'/forgot-password',
     pageTitle:'Passwword reset',
     userId: user._id.toString(),
     passwordToken:token,
@@ -333,7 +333,7 @@ exports.postResetPassword = (req, res, next) => {
     }
 
     if (newPassword.length < 8 || Buffer.byteLength(newPassword, 'utf8') > 72) {
-        req.flash('error', 'Password must be at least 8 characters and no more than 72 bytes.');
+        req.flash('error', 'Password must be at least 8 characters .');
         return res.redirect(`/reset/${token}`);
     }
     User.findOne({
