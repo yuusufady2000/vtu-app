@@ -261,7 +261,7 @@ exports.postForgotPassword = (req, res, next) => {
                     html: `
                         <h2>Password Reset</h2>
                         <p>Click the link below to reset your password:</p>
-                        <a href="${resetUrl}">Reset Password</a>
+                        <a href="https://vtu-app-1-lw64.onrender.com/${token}">Reset Password</a>
                         <p>This link expires in one hour.</p>
                     `
                 }).then(() => {
