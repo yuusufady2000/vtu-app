@@ -51,7 +51,7 @@ exports.getSignup = (req, res, next) => {
             });
           }
             req.flash('error', 'Invalid email address or password');
-          res.redirect('/login');
+         return res.redirect('/login');
         })
         .catch(err => {
           console.log(err);
