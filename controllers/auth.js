@@ -341,21 +341,26 @@ exports.postResetPassword = (req, res, next) => {
         resetToken: token,
         resetExpire: { $gt: Date.now() }
     })
-        .then(user => {
+          .then(user => {
             if (!user) {
                 req.flash('error', 'This password reset link is invalid or has expired.');
                 return null;
             }
-
-            return bcrypt.hash(newPassword, 12)
-                .then(hashedPassword => {
+            })
+        .then(user => {
+            if (user) {
+                resetUser = user;
+              return bcrypt.hash(newPassword, 12)
+            }
+    })
+     .then(hashedPassword => {
                     resetUser.password = hashedPassword;
                     resetUser.resetToken = undefined;
                     resetUser.resetExpire = undefined;
 
                     return resetUser.save();
-                });
-        })
+                })
+        
         .then(result => {
             if (!result) return;
 
