@@ -30,80 +30,56 @@ exports.getSignup = (req, res, next) => {
     });
 };
 
-exports.postLogin = (req, res, next) => {
-    const email = typeof req.body.email === 'string'
-        ? req.body.email.trim().toLowerCase()
-        : '';
 
-    const password = req.body.password;
+exports.postLogin = async (req, res, next) => {
+    try {
+        const email = typeof req.body.email === 'string'
+            ? req.body.email.trim().toLowerCase()
+            : '';
 
-    if (!email || typeof password !== 'string' || !password) {
-        req.flash('error', 'Please enter your email and password.');
-        return res.redirect('/login');
-    }
+        const password = req.body.password;
 
-    User.findOne({ email })
-        .select('+password')
-        .lean()
-        .then(user => {
-            if (!user) {
-                req.flash('error', 'Account not found');
-                return null;
-            }
-
-            return bcrypt.compare(password, user.password)
-                .then(doMatch => {
-                    if (!doMatch) {
-                        req.flash('error', 'Invalid email or password.');
-                        return null;
-                    }
-
-                    return new Promise((resolve, reject) => {
-                       req.session.regenerate(err => {
-    if (err) {
-        return next(err);
-    }
-
-    req.session.userId = user._id.toString();
-    req.session.isLoggedIn = true;
-
-    req.session.save(err => {
-        if (err) {
-            return next(err);
+        if (!email || typeof password !== 'string' || !password) {
+            req.flash('error', 'Please enter your email and password.');
+            return res.redirect('/login');
         }
 
-        res.redirect("/index");
-    });
-});
-                    });
-                });
-        })
-        .then(user => {
-            if (!user) return;
+        const user = await User.findOne({ email });
 
-            Promise.resolve()
-                .then(() => sendMail({
-                    to: user.email,
-                    from: process.env.SENDGRID_EMAIL,
-                    subject: 'New Login detected',
-                    text: `Hello ${user.name}, your Zeal Data account was successfully logged into.`,
-                    html: `
-                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
-                            <h2>New Login to Zeal Data</h2>
-                            <p>Hello ${user.name},</p>
-                            <p>Your Zeal Data account was successfully logged into.</p>
-                            <p>If this wasn't you, please reset your password and contact support.</p>
-                            <p>Thank you for using Zeal Data.</p>
-                        </div>
-                    `
-                }))
-                .then(() => console.log('Login notification email sent.'))
-                .catch(error => console.error('Login notification email failed:', error.message));
+        if (!user) {
+            req.flash('error', 'Invalid email address or password.');
+            return res.redirect('/login');
+        }
 
-            res.redirect('/index');
-        })
-        .catch(next);
+        const doMatch = await bcrypt.compare(password, user.password);
+
+        if (!doMatch) {
+            req.flash('error', 'Invalid email address or password.');
+            return res.redirect('/login');
+        }
+
+        req.session.regenerate(err => {
+            if (err) {
+                return next(err);
+            }
+
+            req.session.isLoggedIn = true;
+            req.session.userId = user._id.toString();
+
+            req.session.save(err => {
+                if (err) {
+                    return next(err);
+                }
+
+                return res.redirect('/index');
+            });
+        });
+
+    } catch (err) {
+        return next(err);
+    }
 };
+
 
 exports.postSignup = (req, res, next) => {
     const name = typeof req.body.name === 'string' ? req.body.name.trim() : '';
@@ -241,20 +217,24 @@ exports.postSignup = (req, res, next) => {
         });
 };
 
+
 exports.postLogout = (req, res, next) => {
     req.session.destroy(err => {
-        if (err) return next(err);
+        if (err) {
+            return next(err);
+        }
 
         res.clearCookie('zeal.sid', {
             httpOnly: true,
-            sameSite: 'lax',
             secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
             path: '/'
         });
 
-        res.redirect('/login');
+        return res.redirect('/login');
     });
 };
+
 
 exports.postForgotPassword = (req, res, next) => {
     const email = typeof req.body.email === 'string'
