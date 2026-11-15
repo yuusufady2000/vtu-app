@@ -1,28 +1,28 @@
 
 const axios = require('axios');
 
-const vtugate = axios.create({
-    baseURL: process.env.VTUGATE_BASE_URL,
-    timeout: 20000,
+const datapea = axios.create({
+    baseURL: 'https://datapea.com/api',
+    timeout: 30000,
     headers: {
-        Authorization: `Bearer ${process.env.VTUGATE_API_KEY}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Token ${process.env.DATAPEA_API_KEY}`,
+        'Content-Type': 'application/json',
         Accept: 'application/json'
     }
 });
 
-exports.fetchAllServices = async () => {
-    const response = await vtugate.post('/fetchallservices');
+exports.fetchDataPlans = async () => {
+    const response = await datapea.get('/data_plans');
     return response.data;
 };
 
-exports.fetchDataPlans = async (serviceId) => {
-    const response = await vtugate.post(
-        '/fetchdataplans',
-        new URLSearchParams({
-            service_id: String(serviceId)
-        })
-    );
+exports.purchaseData = async ({ network, phone, planId, requestId }) => {
+    const response = await datapea.post('/data', {
+        network: Number(network),
+        phone,
+        plan_id: Number(planId),
+        'request-id': requestId
+    });
 
     return response.data;
 };

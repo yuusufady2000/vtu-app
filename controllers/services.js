@@ -1,69 +1,85 @@
 
-const vtugate = require('../util/vtugate');
+const datapea = require('../util/datapea');
 
-exports.getDataPlans = async (req, res, next) => {
-    try {
-        const serviceId = Number(req.body.service_id);
-
-        if (!Number.isInteger(serviceId) || serviceId <= 0) {
-            return res.status(400).json({
-                status: false,
-                message: 'Invalid service ID'
-            });
-        }
-
-        const result = await vtugate.fetchDataPlans(serviceId);
-
-        if (!result.status) {
-            return res.status(400).json(result);
-        }
-
-        res.status(200).json(result);
-
-    } catch (error) {
-        console.error('VTUGATE Error:', error.response?.data || error.message);
-
-        res.status(error.response?.status || 502).json({
-            status: false,
-            message: 'Unable to fetch data plans'
-        });
+const getPlansArray = (result) => {
+    if (Array.isArray(result)) {
+        return result;
     }
+
+    if (Array.isArray(result?.data)) {
+        return result.data;
+    }
+
+    return [];
 };
 
 exports.getDataPage = async (req, res, next) => {
     try {
-        const result = await vtugate.fetchAllServices();
+        const result = await datapea.fetchDataPlans();
 
-        console.log('VTUGATE SERVICES RESPONSE:', result);
+        const dataPlans = getPlansArray(result);
 
-        if (!result.status) {
-            throw new Error(result.message || 'VTUGATE returned unsuccessful status');
+        if (!dataPlans.length) {
+            console.log('DATAPEA RESPONSE:', result);
         }
-
-        const dataServices = (result.data || []).filter(
-            service => service.service_type === 'data'
-        );
-
-        console.log('DATA SERVICES:', dataServices);
 
         res.render('shop/data', {
             pageTitle: 'Buy Data',
             path: '/buy-data',
-            dataServices
+            dataPlans,
+            errorMessage: null
         });
 
     } catch (error) {
-        console.error('FETCH ALL SERVICES ERROR:', {
-            message: error.message,
-            status: error.response?.status,
-            response: error.response?.data
-        });
+        console.error(
+            'DATAPEA DATA PLANS ERROR:',
+            error.response?.data || error.message
+        );
 
         res.render('shop/data', {
             pageTitle: 'Buy Data',
             path: '/buy-data',
-            dataServices: [],
-            errorMessage: 'Unable to load data networks. Please try again.'
+            dataPlans: [],
+            errorMessage: 'Unable to load data plans. Please try again.'
+        });
+    }
+};
+
+exports.getDataPlans = async (req, res, next) => {
+    try {
+        const network = typeof req.body.network === 'string'
+            ? req.body.network.trim()
+            : '';
+
+        if (!network) {
+            return res.status(400).json({
+                status: false,
+                message: 'Please select a network.'
+            });
+        }
+
+        const result = await datapea.fetchDataPlans();
+        const plans = getPlansArray(result);
+
+        const filteredPlans = plans.filter(plan =>
+            typeof plan.network === 'string' &&
+            plan.network.toLowerCase() === network.toLowerCase()
+        );
+
+        return res.status(200).json({
+            status: true,
+            data: filteredPlans
+        });
+
+    } catch (error) {
+        console.error(
+            'DATAPEA FETCH PLANS ERROR:',
+            error.response?.data || error.message
+        );
+
+        return res.status(502).json({
+            status: false,
+            message: 'Unable to fetch data plans.'
         });
     }
 };

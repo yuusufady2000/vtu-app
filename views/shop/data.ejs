@@ -20,18 +20,15 @@
                     value="<%= csrfToken %>"
                 >
 
-                <label for="service-id">Select Network</label>
+                <label for="network">Select Network</label>
 
-                <select id="service-id" required>
+                <select id="network" required>
                     <option value="">Choose a network</option>
 
-                    <% if (dataServices && dataServices.length > 0) { %>
-                        <% dataServices.forEach(service => { %>
-                            <option value="<%= service.service_id %>">
-                                <%= service.network_name.toUpperCase() %>
-                                <% if (service.data_type) { %>
-                                    - <%= service.data_type.toUpperCase() %>
-                                <% } %>
+                    <% if (dataPlans && dataPlans.length > 0) { %>
+                        <% [...new Set(dataPlans.map(plan => plan.network))].filter(Boolean).forEach(network => { %>
+                            <option value="<%= network %>">
+                                <%= network.toUpperCase() %>
                             </option>
                         <% }) %>
                     <% } %>
@@ -40,7 +37,7 @@
                 <button
                     type="submit"
                     id="fetch-button"
-                    <%= !dataServices || !dataServices.length ? 'disabled' : '' %>
+                    <%= !dataPlans || !dataPlans.length ? 'disabled' : '' %>
                 >
                     Fetch Data Plans
                 </button>
@@ -56,7 +53,7 @@
 
             <div id="plans-container" class="plans-container">
                 <p class="empty-message">
-                    Your available plans will appear here.
+                    Select a network to view available data plans.
                 </p>
             </div>
         </section>
@@ -64,7 +61,7 @@
 
     <script>
         const form = document.getElementById('data-form');
-        const serviceInput = document.getElementById('service-id');
+        const networkInput = document.getElementById('network');
         const button = document.getElementById('fetch-button');
         const message = document.getElementById('message');
         const plansContainer = document.getElementById('plans-container');
@@ -73,9 +70,9 @@
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            const serviceId = serviceInput.value;
+            const network = networkInput.value;
 
-            if (!serviceId || Number(serviceId) <= 0) {
+            if (!network) {
                 message.textContent = 'Please select a network.';
                 return;
             }
@@ -92,7 +89,7 @@
                         'Content-Type': 'application/x-www-form-urlencoded'
                     },
                     body: new URLSearchParams({
-                        service_id: serviceId,
+                        network,
                         _csrf: csrfToken
                     })
                 });
@@ -105,10 +102,10 @@
                     );
                 }
 
-                const plans = result.data?.data_plans || [];
+                const plans = result.data || [];
 
                 if (!plans.length) {
-                    message.textContent = 'No data plans were found.';
+                    message.textContent = 'No data plans were found for this network.';
                     return;
                 }
 
@@ -117,32 +114,29 @@
                     card.className = 'plan-card';
 
                     const name = document.createElement('h3');
-                    name.textContent = plan.name || 'Data Plan';
+                    name.textContent = plan.datasize || 'Data Plan';
+
+                    const type = document.createElement('p');
+                    type.textContent = `Plan Type: ${plan.type || 'N/A'}`;
 
                     const price = document.createElement('p');
                     price.textContent =
-                        `₦${Number(plan.price).toLocaleString()}`;
+                        `₦${Number(plan.price).toLocaleString('en-NG')}`;
 
                     const validity = document.createElement('p');
                     validity.textContent =
-                        `${plan.validity_days ?? 'N/A'} days validity`;
+                        `${plan.day || 'N/A'} days validity`;
 
                     const network = document.createElement('p');
                     network.textContent =
-                        `Network: ${plan.network_name || 'N/A'}`;
-
-                    const reliability = document.createElement('p');
-                    reliability.textContent =
-                        plan.delivery_rate == null
-                            ? 'Delivery history unavailable'
-                            : `Delivery rate: ${plan.delivery_rate}%`;
+                        `Network: ${plan.network || 'N/A'}`;
 
                     card.append(
                         name,
+                        type,
                         price,
                         validity,
-                        network,
-                        reliability
+                        network
                     );
 
                     plansContainer.appendChild(card);
@@ -160,4 +154,5 @@
     </script>
 
     <%- include('../includes/end.ejs') %>
-
+</body>
+</html>
