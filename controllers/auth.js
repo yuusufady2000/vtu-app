@@ -232,7 +232,7 @@ exports.postForgotPassword = (req, res, next) => {
 
     if (!email) {
         req.flash('error', 'Please enter your email address.');
-        return res.redirect('/login');
+        return res.redirect('/password');
     }
 
     crypto.randomBytes(32, (err, buffer) => {
