@@ -214,9 +214,14 @@ exports.postLogout = (req, res, next) => {
 };
 
 exports.getReset = (req,res,next) => {
+     const errorMessages = req.flash('error');
+    const successMessages = req.flash('success');
+
       res.render('shop/forgot-password', {
     path:'/forgot-password',
     pageTitle:'Reset Password',
+     errorMessage: errorMessages.length ? errorMessages[0] : null,
+        successMessage: successMessages.length ? successMessages[0] : null,
   })
 }
 
@@ -269,7 +274,8 @@ exports.postForgotPassword = (req, res, next) => {
 };
 
 exports.getPassword = (req, res, next) => {
-
+ const errorMessages = req.flash('error');
+    const successMessages = req.flash('success');
 const token = req.params.token;
   User.findOne({resetToken: token, resetExpire: {$gt: Date.now()}})
   .then(user => {
@@ -277,7 +283,9 @@ const token = req.params.token;
     path:'/password',
     pageTitle:'Passwword reset',
     userId: user._id.toString(),
-    passwordToken:token
+    passwordToken:token,
+     errorMessage: errorMessages.length ? errorMessages[0] : null,
+        successMessage: successMessages.length ? successMessages[0] : null,
   })
   })
   .catch(err => {
