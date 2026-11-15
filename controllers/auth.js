@@ -213,6 +213,13 @@ exports.postLogout = (req, res, next) => {
     });
 };
 
+exports.getReset = (req,res,next) => {
+      res.render('shop/forgot-password', {
+    path:'/forgot-password',
+    pageTitle:'Reset Password',
+  })
+}
+
 exports.postForgotPassword = (req, res, next) => {
     const email = typeof req.body.email === 'string'
         ? req.body.email.trim().toLowerCase()
@@ -224,32 +231,24 @@ exports.postForgotPassword = (req, res, next) => {
     }
 
     crypto.randomBytes(32, (err, buffer) => {
-        if (err) return next(err);
+                if (err) return next(err);
 
-        const token = buffer.toString('hex');
-        const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+                const token = buffer.toString('hex');
+                const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+                const resetUrl = `${req.protocol}://${req.get('host')}/reset/${token}`;
 
-        User.findOne({ email })
+                User.findOne({ email })
             .then(user => {
                 if (!user) {
-                    req.flash('success', 'If an account exists with this email, a password reset link will be sent.');
+                                        req.flash('error', 'Email account not found.');
+                                        res.redirect('/login');
                     return null;
                 }
 
-                user.resetToken = tokenHash;
-                user.resetExpire = Date.now() + 3600000;
-
-                return user.save()
-                    .then(() => user);
-            })
-            .then(user => {
-                if (!user) {
-                    return res.redirect('/login');
-                }
-
-                const resetUrl = `${req.protocol}://${req.get('host')}/reset/${token}`;
-
-                return sendMail({
+             user.resetToken = tokenHash;
+               user.resetExpire = Date.now() + 3600000;
+                  return user.save()
+                    .then(() => sendMail({
                     to: email,
                     from: process.env.SENDGRID_EMAIL,
                     subject: 'Zeal Data Password Reset',
@@ -263,34 +262,49 @@ exports.postForgotPassword = (req, res, next) => {
                 }).then(() => {
                     req.flash('success', 'A password reset link has been sent to your email.');
                     res.redirect('/login');
-                });
+                }));
             })
-            .catch(next);
+            .catch(err => {console.log(err)});
     });
 };
 
 exports.getPassword = (req, res, next) => {
-    const token = req.params.token;
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
-    User.findOne({
-        resetToken: tokenHash,
-        resetExpire: { $gt: Date.now() }
-    })
-        .then(user => {
-            if (!user) {
-                req.flash('error', 'This password reset link is invalid or has expired.');
-                return res.redirect('/login');
-            }
+const token = req.params.token;
+  User.findOne({resetToken: token, resetExpire: {$gt: Date.now()}})
+  .then(user => {
+      res.render('shop/password', {
+    path:'/password',
+    pageTitle:'Passwword reset',
+    userId: user._id.toString(),
+    passwordToken:token
+  })
+  })
+  .catch(err => {
+    console.log(err)
+  })
 
-            res.render('auth/reset-password', {
-                path: '/reset',
-                pageTitle: 'Reset Password',
-                userId: user._id.toString(),
-                passwordToken: token
-            });
-        })
-        .catch(next);
+    // const token = req.params.token;
+    // const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    // User.findOne({
+    //     resetToken: tokenHash,
+    //     resetExpire: { $gt: Date.now() }
+    // })
+    //     .then(user => {
+    //         if (!user) {
+    //             req.flash('error', 'This password reset link is invalid or has expired.');
+    //             return res.redirect('/login');
+    //         }
+
+    //         res.render('auth/reset-password', {
+    //             path: '/reset',
+    //             pageTitle: 'Reset Password',
+    //             userId: user._id.toString(),
+    //             passwordToken: token
+    //         });
+    //     })
+    //     .catch(next);
 };
 
 exports.postResetPassword = (req, res, next) => {
@@ -298,6 +312,8 @@ exports.postResetPassword = (req, res, next) => {
     const confirmPassword = req.body.confirmPassword;
     const token = req.body.passwordToken;
     const userId = req.body.userId;
+
+    let resetUser;
 
     if (
         typeof newPassword !== 'string' ||
@@ -312,9 +328,6 @@ exports.postResetPassword = (req, res, next) => {
         req.flash('error', 'Password must be at least 8 characters and no more than 72 bytes.');
         return res.redirect(`/reset/${token}`);
     }
-
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-
     User.findOne({
         _id: userId,
         resetToken: tokenHash,
@@ -328,11 +341,11 @@ exports.postResetPassword = (req, res, next) => {
 
             return bcrypt.hash(newPassword, 12)
                 .then(hashedPassword => {
-                    user.password = hashedPassword;
-                    user.resetToken = undefined;
-                    user.resetExpire = undefined;
+                    resetUser.password = hashedPassword;
+                    resetUser.resetToken = undefined;
+                    resetUser.resetExpire = undefined;
 
-                    return user.save();
+                    return resetUser.save();
                 });
         })
         .then(result => {
@@ -341,5 +354,5 @@ exports.postResetPassword = (req, res, next) => {
             req.flash('success', 'Your password has been changed successfully.');
             res.redirect('/login');
         })
-        .catch(next);
+        .catch(err => {console.log(err)});
 };
