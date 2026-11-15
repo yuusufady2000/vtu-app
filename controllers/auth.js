@@ -246,7 +246,7 @@ exports.postForgotPassword = (req, res, next) => {
             .then(user => {
                 if (!user) {
                                         req.flash('error', 'Email account not found.');
-                                        res.redirect('/password');
+                                        res.redirect('/forgotpassword');
                     return null;
                 }
 
