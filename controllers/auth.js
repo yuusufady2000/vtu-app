@@ -261,7 +261,7 @@ exports.postForgotPassword = (req, res, next) => {
                     html: `
                         <h2>Password Reset</h2>
                         <p>Click the link below to reset your password:</p>
-                        <a href="https://vtu-app-1-lw64.onrender.com/${token}">Reset Password</a>
+                        <a href="https://vtu-app-1-lw64.onrender.com/forgot-password${token}">Reset Password</a>
                         <p>This link expires in one hour.</p>
                     `
                 }).then(() => {
@@ -329,12 +329,12 @@ exports.postResetPassword = (req, res, next) => {
         newPassword !== confirmPassword
     ) {
         req.flash('error', 'Passwords do not match.');
-        return res.redirect(`/reset/${token}`);
+        return res.redirect(`/forgot-password/${token}`);
     }
 
     if (newPassword.length < 8 || Buffer.byteLength(newPassword, 'utf8') > 72) {
         req.flash('error', 'Password must be at least 8 characters .');
-        return res.redirect(`/reset/${token}`);
+        return res.redirect(`/forgot-password/${token}`);
     }
     User.findOne({
         _id: userId,
