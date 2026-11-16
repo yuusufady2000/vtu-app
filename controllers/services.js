@@ -1,5 +1,13 @@
 
 const datapea = require('../util/datapea');
+const crypto = require('crypto');
+
+const networkIds = {
+    mtn: 1,
+    airtel: 2,
+    glo: 3,
+    '9mobile': 4
+};
 
 const getPlansArray = (result) => {
     if (Array.isArray(result)) {
@@ -14,10 +22,24 @@ const getPlansArray = (result) => {
         return result.plans;
     }
 
+    if (Array.isArray(result?.data?.data)) {
+        return result.data.data;
+    }
+
     return [];
 };
 
-exports.getDataPage = async (req, res, next) => {
+const normalizeNetwork = (network) => {
+    const value = String(network || '').trim().toLowerCase();
+
+    if (value === '9 mobile' || value === '9mobile') {
+        return '9mobile';
+    }
+
+    return value;
+};
+
+exports.getDataPage = async (req, res) => {
     try {
         const result = await datapea.fetchDataPlans();
         const dataPlans = getPlansArray(result);
@@ -28,7 +50,6 @@ exports.getDataPage = async (req, res, next) => {
             dataPlans,
             errorMessage: null
         });
-
     } catch (error) {
         console.error('DATAPEA PLANS ERROR:', {
             status: error.response?.status,
@@ -47,13 +68,13 @@ exports.getDataPage = async (req, res, next) => {
 
 exports.getDataPlans = async (req, res) => {
     try {
-        const network = String(req.body.network || '').trim();
-        const type = String(req.body.type || '').trim();
+        const network = normalizeNetwork(req.body.network);
+        const type = String(req.body.type || '').trim().toLowerCase();
 
-        if (!network) {
+        if (!network || !networkIds[network]) {
             return res.status(400).json({
                 status: false,
-                message: 'Please select a network.'
+                message: 'Please select a valid network.'
             });
         }
 
@@ -61,13 +82,10 @@ exports.getDataPlans = async (req, res) => {
         const plans = getPlansArray(result);
 
         const filteredPlans = plans.filter(plan => {
-            const networkMatches =
-                String(plan.network || '').toLowerCase() === network.toLowerCase();
+            const planNetwork = normalizeNetwork(plan.network);
+            const planType = String(plan.type || '').trim().toLowerCase();
 
-            const typeMatches = !type ||
-                String(plan.type || '').toLowerCase() === type.toLowerCase();
-
-            return networkMatches && typeMatches;
+            return planNetwork === network && (!type || planType === type);
         });
 
         return res.status(200).json({
@@ -75,7 +93,6 @@ exports.getDataPlans = async (req, res) => {
             count: filteredPlans.length,
             data: filteredPlans
         });
-
     } catch (error) {
         console.error('DATAPEA FETCH PLANS ERROR:', {
             status: error.response?.status,
@@ -85,8 +102,7 @@ exports.getDataPlans = async (req, res) => {
 
         return res.status(502).json({
             status: false,
-            message: 'Unable to fetch data plans.',
-            error: error.response?.data || error.message
+            message: 'Unable to fetch data plans.'
         });
     }
 };
@@ -94,48 +110,80 @@ exports.getDataPlans = async (req, res) => {
 exports.postBuyData = async (req, res) => {
     try {
         const phone = String(req.body.phone || '').trim();
-        const network = req.body.network;
-        const planId = req.body.planId;
+        const networkName = normalizeNetwork(req.body.network);
+        const planId = Number(req.body.planId);
 
-        if (!phone || !/^0\d{10}$/.test(phone)) {
+        const network = networkIds[networkName];
+
+        if (!/^0\d{10}$/.test(phone)) {
             return res.status(400).json({
                 status: false,
                 message: 'Enter a valid 11-digit phone number.'
             });
         }
 
-        if (
-            network === undefined ||
-            network === null ||
-            !Number.isInteger(Number(network))
-        ) {
+        if (!network) {
             return res.status(400).json({
                 status: false,
-                message: 'A valid numeric network ID is required.'
+                message: 'Please select a valid network.'
             });
         }
 
-        if (
-            planId === undefined ||
-            planId === null ||
-            !Number.isInteger(Number(planId))
-        ) {
+        if (!Number.isSafeInteger(planId) || planId <= 0) {
             return res.status(400).json({
                 status: false,
                 message: 'Please select a valid data plan.'
             });
         }
 
-       const result = await datapea.purchaseData({
-    network,
-    phone,
-    plan_id: planId,
-    requestId: `data_${require('crypto').randomUUID()}`
-});
+        const plansResult = await datapea.fetchDataPlans();
+        const plans = getPlansArray(plansResult);
 
-        return res.status(200).json({
-            status: true,
-            message: 'Datapea purchase request submitted.',
+        const selectedPlan = plans.find(plan =>
+            Number(plan.plan_id) === planId &&
+            normalizeNetwork(plan.network) === networkName
+        );
+
+        if (!selectedPlan) {
+            return res.status(400).json({
+                status: false,
+                message: 'The selected plan is invalid. Please refresh the plans and try again.'
+            });
+        }
+
+        const result = await datapea.purchaseData({
+            network,
+            phone,
+            planId,
+            requestId: `data_${crypto.randomUUID()}`
+        });
+
+        const providerStatus = String(
+            result?.status || result?.Status || ''
+        ).trim().toLowerCase();
+
+        if (providerStatus === 'success' || providerStatus === 'successful') {
+            return res.status(200).json({
+                status: true,
+                transactionStatus: 'success',
+                message: result.message || 'Data purchase successful.',
+                data: result
+            });
+        }
+
+        if (providerStatus === 'pending' || providerStatus === 'processing') {
+            return res.status(200).json({
+                status: true,
+                transactionStatus: 'pending',
+                message: result.message || 'Your data purchase is being processed.',
+                data: result
+            });
+        }
+
+        return res.status(502).json({
+            status: false,
+            transactionStatus: 'unknown',
+            message: result?.message || 'The provider returned an unconfirmed transaction status.',
             data: result
         });
 
@@ -148,8 +196,7 @@ exports.postBuyData = async (req, res) => {
 
         return res.status(error.response?.status || 502).json({
             status: false,
-            message: 'Unable to process the data purchase.',
-            error: error.response?.data || error.message
+            message: error.response?.data?.message || 'Unable to process the data purchase.'
         });
     }
 };

@@ -3,557 +3,689 @@
 <link rel="stylesheet" href="/css/dash.css">
 
 <style>
-    .plan-card button,
-    #fetch-button,
-    #purchase-button {
-        cursor: pointer;
+.data-page {
+    max-width: 1050px;
+    margin: 35px auto;
+    padding: 20px;
+}
+
+.data-header {
+    margin-bottom: 25px;
+}
+
+.data-header h2 {
+    font-size: 25px;
+    margin-bottom: 8px;
+}
+
+.data-header p {
+    color: #777;
+    margin: 0;
+}
+
+.data-filter-box {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    background: #fff;
+    padding: 22px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+}
+
+.data-field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 9px;
+}
+
+.data-field select,
+.data-field input {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    background: #fff;
+}
+
+.data-field select:focus,
+.data-field input:focus {
+    border-color: #087f5b;
+}
+
+.data-plans-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.data-plans-heading h3 {
+    font-size: 19px;
+    margin: 0;
+}
+
+.data-plans-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.data-plan-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+    transition: 0.2s;
+}
+
+.data-plan-card.selected {
+    border: 2px solid #087f5b;
+}
+
+.data-plan-size {
+    font-size: 23px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.data-plan-type {
+    display: inline-block;
+    padding: 5px 10px;
+    background: #e8f5ef;
+    color: #087f5b;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 13px;
+}
+
+.data-plan-details {
+    color: #777;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.data-plan-price {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.data-plan-button {
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    background: #087f5b;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.data-plan-button:hover {
+    background: #066b4c;
+}
+
+.data-plan-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.data-message {
+    padding: 14px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+    display: none;
+}
+
+.data-message.error {
+    display: block;
+    background: #fff0f0;
+    color: #c62828;
+}
+
+.data-message.info {
+    display: block;
+    background: #eef6ff;
+    color: #175a9c;
+}
+
+.data-empty {
+    background: #fff;
+    padding: 35px 20px;
+    border-radius: 12px;
+    text-align: center;
+    color: #777;
+    grid-column: 1 / -1;
+}
+
+.data-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 9999;
+}
+
+.data-modal.show {
+    display: flex;
+}
+
+.data-modal-content {
+    width: 100%;
+    max-width: 430px;
+    background: #fff;
+    padding: 25px;
+    border-radius: 14px;
+}
+
+.data-modal-content h3 {
+    margin: 0 0 8px;
+    font-size: 21px;
+}
+
+.data-modal-content p {
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.data-modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.data-modal-actions button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.data-cancel {
+    background: #eee;
+    color: #333;
+}
+
+.data-confirm {
+    background: #087f5b;
+    color: #fff;
+}
+
+.data-close {
+    width: 100%;
+    margin-top: 15px;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #087f5b;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    display: none;
+}
+
+.data-modal-details {
+    background: #f7f8fa;
+    border-radius: 9px;
+    padding: 14px;
+    font-size: 14px;
+}
+
+.data-modal-details div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 8px 0;
+}
+
+.data-modal-details strong {
+    text-align: right;
+}
+
+@media (max-width: 750px) {
+    .data-plans-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 520px) {
+    .data-page {
+        padding: 12px;
+        margin: 20px auto;
     }
 
-    .plan-card button:disabled,
-    #fetch-button:disabled,
-    #purchase-button:disabled {
-        opacity: .6;
-        cursor: not-allowed;
+    .data-filter-box {
+        grid-template-columns: 1fr;
+        padding: 16px;
     }
 
-    #purchase-section[hidden],
-    .purchase-modal[hidden] {
-        display: none;
+    .data-plans-grid {
+        grid-template-columns: 1fr;
     }
-
-    .purchase-modal {
-        position: fixed;
-        inset: 0;
-        z-index: 9999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        background: rgba(0, 0, 0, .65);
-    }
-
-    .purchase-modal-content {
-        width: 100%;
-        max-width: 420px;
-        padding: 30px 24px;
-        border-radius: 18px;
-        background: #fff;
-        color: #222;
-        text-align: center;
-        animation: modalShow .25s ease;
-    }
-
-    .success-icon {
-        width: 65px;
-        height: 65px;
-        margin: 0 auto 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        background: #e6f8ed;
-        color: #16a34a;
-        font-size: 35px;
-        font-weight: bold;
-    }
-
-    .pending-icon {
-        background: #fff4dc;
-        color: #b7791f;
-    }
-
-    .transaction-details {
-        padding: 15px;
-        border-radius: 12px;
-        background: #f7f7f7;
-        text-align: left;
-    }
-
-    .transaction-details div {
-        display: flex;
-        justify-content: space-between;
-        gap: 15px;
-        padding: 12px 0;
-        border-bottom: 1px solid #e5e5e5;
-    }
-
-    .transaction-details div:last-child {
-        border-bottom: none;
-    }
-
-    .transaction-details span {
-        color: #777;
-    }
-
-    .transaction-details strong {
-        text-align: right;
-        overflow-wrap: anywhere;
-    }
-
-    #close-modal {
-        width: 100%;
-        margin-top: 22px;
-        padding: 14px;
-        border: none;
-        border-radius: 9px;
-        background: #16a34a;
-        color: white;
-        font-weight: 600;
-    }
-
-    @keyframes modalShow {
-        from {
-            opacity: 0;
-            transform: translateY(15px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+}
 </style>
+
 </head>
 
 <body>
-    <%- include('../includes/nav.ejs') %>
+<%- include('../includes/nav.ejs') %>
 
-    <main class="data-container">
-        <section class="data-header">
-            <h1>Buy Data</h1>
-            <p>Select your network and explore available data plans.</p>
-        </section>
+<main class="data-page">
 
-        <section class="data-card">
-            <form id="data-form">
-                <input type="hidden" id="csrf-token" value="<%= csrfToken %>">
-
-                <label for="network">Select Network</label>
-                <select id="network" required>
-                    <option value="MTN" selected>MTN</option>
-                    <option value="Glo">Glo</option>
-                    <option value="Airtel">Airtel</option>
-                    <option value="9mobile">9mobile</option>
-                </select>
-
-                <label for="type">Select Plan Type</label>
-                <select id="type" required>
-                    <option value="SME" selected>SME</option>
-                    <option value="Corporate">Corporate</option>
-                    <option value="Gifting">Gifting</option>
-                </select>
-
-                <button type="submit" id="fetch-button">
-                    Fetch Data Plans
-                </button>
-            </form>
-
-            <p id="message" role="status"></p>
-        </section>
-
-        <section class="plans-section">
-            <h2>Available Data Plans</h2>
-
-            <div id="plans-container" class="plans-container">
-                <p>Loading data plans...</p>
-            </div>
-        </section>
-
-        <section class="data-card" id="purchase-section" hidden>
-            <h2>Complete Your Purchase</h2>
-
-            <div id="selected-plan"></div>
-
-            <form id="purchase-form">
-                <label for="phone">Phone Number</label>
-
-                <input
-                    type="tel"
-                    id="phone"
-                    placeholder="08012345678"
-                    maxlength="11"
-                    pattern="0[0-9]{10}"
-                    inputmode="numeric"
-                    required
-                >
-
-                <button type="submit" id="purchase-button">
-                    Buy Data
-                </button>
-            </form>
-
-            <p id="purchase-message" role="status"></p>
-        </section>
-    </main>
-
-    <div class="purchase-modal" id="purchase-modal" hidden>
-        <div class="purchase-modal-content">
-            <div class="success-icon" id="modal-icon">✓</div>
-
-            <h2 id="modal-title">Purchase Successful!</h2>
-            <p id="modal-description"></p>
-
-            <div class="transaction-details">
-                <div>
-                    <span>Network</span>
-                    <strong id="modal-network"></strong>
-                </div>
-
-                <div>
-                    <span>Data Plan</span>
-                    <strong id="modal-plan"></strong>
-                </div>
-
-                <div>
-                    <span>Phone Number</span>
-                    <strong id="modal-phone"></strong>
-                </div>
-
-                <div>
-                    <span>Amount</span>
-                    <strong id="modal-price"></strong>
-                </div>
-
-                <div>
-                    <span>Status</span>
-                    <strong id="modal-status"></strong>
-                </div>
-
-                <div id="reference-row" hidden>
-                    <span>Reference</span>
-                    <strong id="modal-reference"></strong>
-                </div>
-            </div>
-
-            <button type="button" id="close-modal">Done</button>
-        </div>
+    <div class="data-header">
+        <h2>Buy Data</h2>
+        <p>Select your network, choose a data plan and enter the recipient's phone number.</p>
     </div>
 
-    <script>
-        const form = document.getElementById('data-form');
-        const networkInput = document.getElementById('network');
-        const typeInput = document.getElementById('type');
-        const fetchButton = document.getElementById('fetch-button');
-        const message = document.getElementById('message');
-        const plansContainer = document.getElementById('plans-container');
+    <div id="data-message" class="data-message"></div>
 
-        const purchaseSection = document.getElementById('purchase-section');
-        const purchaseForm = document.getElementById('purchase-form');
-        const purchaseButton = document.getElementById('purchase-button');
-        const purchaseMessage = document.getElementById('purchase-message');
-        const selectedPlanElement = document.getElementById('selected-plan');
-        const phoneInput = document.getElementById('phone');
+    <div class="data-filter-box">
 
-        const purchaseModal = document.getElementById('purchase-modal');
-        const closeModal = document.getElementById('close-modal');
-        const modalIcon = document.getElementById('modal-icon');
+        <div class="data-field">
+            <label for="network">Select Network</label>
+            <select id="network">
+                <option value="">Choose network</option>
+                <option value="MTN">MTN</option>
+                <option value="Airtel">Airtel</option>
+                <option value="Glo">Glo</option>
+                <option value="9mobile">9mobile</option>
+            </select>
+        </div>
 
-        const csrfToken = document.getElementById('csrf-token').value;
+        <div class="data-field">
+            <label for="plan-type">Select Plan Type</label>
+            <select id="plan-type">
+                <option value="">All plan types</option>
+                <option value="SME">SME</option>
+                <option value="Corporate">Corporate</option>
+                <option value="Gifting">Gifting</option>
+            </select>
+        </div>
 
-        let selectedPlan = null;
-        let loadingPlans = false;
-        let purchasing = false;
+    </div>
 
-        function showPurchaseModal(plan, phone, status, description, reference) {
-            const successful = status === 'Successful';
+    <div class="data-plans-heading">
+        <h3>Available Data Plans</h3>
+        <span id="plan-count">0 plans</span>
+    </div>
 
-            modalIcon.textContent = successful ? '✓' : '!';
-            modalIcon.className = successful
-                ? 'success-icon'
-                : 'success-icon pending-icon';
+    <div id="data-plans" class="data-plans-grid">
+        <div class="data-empty">Select a network to view available plans.</div>
+    </div>
 
-            document.getElementById('modal-title').textContent =
-                successful ? 'Purchase Successful!' : 'Purchase Pending';
+</main>
 
-            document.getElementById('modal-description').textContent =
-                description;
+<div class="data-modal" id="purchase-modal">
+    <div class="data-modal-content">
 
-            document.getElementById('modal-network').textContent =
-                plan.network || networkInput.value;
+        <h3 id="modal-title">Confirm Data Purchase</h3>
+        <p id="modal-description">Confirm the details before continuing.</p>
 
-            document.getElementById('modal-plan').textContent =
-                plan.datasize || 'Data Plan';
+        <div id="purchase-details" class="data-modal-details">
 
-            document.getElementById('modal-phone').textContent = phone;
+            <div>
+                <span>Network</span>
+                <strong id="detail-network">-</strong>
+            </div>
 
-            document.getElementById('modal-price').textContent =
-                `₦${Number(plan.price).toLocaleString('en-NG')}`;
+            <div>
+                <span>Data Plan</span>
+                <strong id="detail-plan">-</strong>
+            </div>
 
-            document.getElementById('modal-status').textContent = status;
+            <div>
+                <span>Price</span>
+                <strong id="detail-price">-</strong>
+            </div>
 
-            const referenceRow = document.getElementById('reference-row');
+            <div>
+                <span>Phone Number</span>
+                <strong id="detail-phone">-</strong>
+            </div>
 
-            if (reference) {
-                document.getElementById('modal-reference').textContent =
-                    reference;
-                referenceRow.hidden = false;
-            } else {
-                referenceRow.hidden = true;
-            }
+        </div>
 
-            purchaseModal.hidden = false;
+        <div class="data-field" id="phone-field" style="margin-top:18px;">
+            <label for="phone">Recipient Phone Number</label>
+            <input
+                type="tel"
+                id="phone"
+                maxlength="11"
+                inputmode="numeric"
+                placeholder="08012345678"
+                autocomplete="tel"
+            >
+        </div>
+
+        <div class="data-modal-actions" id="confirm-actions">
+            <button type="button" class="data-cancel" id="cancel-purchase">
+                Cancel
+            </button>
+
+            <button type="button" class="data-confirm" id="confirm-purchase">
+                Confirm Purchase
+            </button>
+        </div>
+
+        <button type="button" class="data-close" id="close-modal">
+            Close
+        </button>
+
+    </div>
+</div>
+
+<script>
+const csrfToken = '<%= csrfToken %>';
+
+const networkSelect = document.getElementById('network');
+const typeSelect = document.getElementById('plan-type');
+const plansContainer = document.getElementById('data-plans');
+const planCount = document.getElementById('plan-count');
+const messageBox = document.getElementById('data-message');
+
+const purchaseModal = document.getElementById('purchase-modal');
+const modalTitle = document.getElementById('modal-title');
+const modalDescription = document.getElementById('modal-description');
+const phoneInput = document.getElementById('phone');
+
+const confirmButton = document.getElementById('confirm-purchase');
+const cancelButton = document.getElementById('cancel-purchase');
+const closeButton = document.getElementById('close-modal');
+
+const confirmActions = document.getElementById('confirm-actions');
+const phoneField = document.getElementById('phone-field');
+
+let selectedPlan = null;
+let loadingPlans = false;
+let purchasing = false;
+
+const formatPrice = (price) => {
+    const amount = Number(price);
+
+    if (!Number.isFinite(amount)) {
+        return 'Price unavailable';
+    }
+
+    return new Intl.NumberFormat('en-NG', {
+        style: 'currency',
+        currency: 'NGN'
+    }).format(amount);
+};
+
+const showMessage = (message, type = 'error') => {
+    messageBox.textContent = message;
+    messageBox.className = `data-message ${type}`;
+};
+
+const clearMessage = () => {
+    messageBox.textContent = '';
+    messageBox.className = 'data-message';
+};
+
+const getErrorMessage = (result) => {
+    if (result?.message) {
+        return result.message;
+    }
+
+    return 'Something went wrong. Please try again.';
+};
+
+const renderPlans = (plans) => {
+    plansContainer.replaceChildren();
+    planCount.textContent = `${plans.length} plans`;
+
+    if (!plans.length) {
+        const empty = document.createElement('div');
+        empty.className = 'data-empty';
+        empty.textContent = 'No plans found for this selection.';
+        plansContainer.appendChild(empty);
+        return;
+    }
+
+    plans.forEach(plan => {
+        const card = document.createElement('div');
+        card.className = 'data-plan-card';
+
+        const size = document.createElement('div');
+        size.className = 'data-plan-size';
+        size.textContent = plan.datasize || 'Data plan';
+
+        const type = document.createElement('span');
+        type.className = 'data-plan-type';
+        type.textContent = plan.type || 'Data';
+
+        const details = document.createElement('div');
+        details.className = 'data-plan-details';
+        details.textContent = `${plan.network || ''} • ${plan.day || 'N/A'} days`;
+
+        const price = document.createElement('div');
+        price.className = 'data-plan-price';
+        price.textContent = formatPrice(plan.price);
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'data-plan-button';
+        button.textContent = 'Buy Now';
+
+        button.addEventListener('click', () => {
+            selectedPlan = plan;
+
+            document.querySelectorAll('.data-plan-card').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            card.classList.add('selected');
+
+            document.getElementById('detail-network').textContent = plan.network || '';
+            document.getElementById('detail-plan').textContent =
+                `${plan.datasize || ''} (${plan.type || ''})`;
+            document.getElementById('detail-price').textContent = formatPrice(plan.price);
+            document.getElementById('detail-phone').textContent = 'Enter below';
+
+            phoneInput.value = '';
+            modalTitle.textContent = 'Confirm Data Purchase';
+            modalDescription.textContent = 'Enter the recipient phone number and confirm your purchase.';
+
+            phoneField.style.display = 'block';
+            confirmActions.style.display = 'flex';
+            closeButton.style.display = 'none';
+            purchaseModal.classList.add('show');
+        });
+
+        card.append(size, type, details, price, button);
+        plansContainer.appendChild(card);
+    });
+};
+
+const fetchPlans = async () => {
+    const network = networkSelect.value;
+    const type = typeSelect.value;
+
+    clearMessage();
+
+    if (!network) {
+        plansContainer.replaceChildren();
+
+        const empty = document.createElement('div');
+        empty.className = 'data-empty';
+        empty.textContent = 'Select a network to view available plans.';
+
+        plansContainer.appendChild(empty);
+        planCount.textContent = '0 plans';
+        return;
+    }
+
+    if (loadingPlans) return;
+
+    loadingPlans = true;
+
+    plansContainer.replaceChildren();
+
+    const loading = document.createElement('div');
+    loading.className = 'data-empty';
+    loading.textContent = 'Loading data plans...';
+
+    plansContainer.appendChild(loading);
+
+    try {
+        const response = await fetch('/fetch-data-plans', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'CSRF-Token': csrfToken
+            },
+            body: JSON.stringify({
+                network,
+                type,
+                _csrf: csrfToken
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.status) {
+            throw new Error(getErrorMessage(result));
         }
 
-        closeModal.addEventListener('click', () => {
-            purchaseModal.hidden = true;
+        renderPlans(Array.isArray(result.data) ? result.data : []);
+
+    } catch (error) {
+        plansContainer.replaceChildren();
+
+        const empty = document.createElement('div');
+        empty.className = 'data-empty';
+        empty.textContent = error.message || 'Unable to load data plans.';
+
+        plansContainer.appendChild(empty);
+        planCount.textContent = '0 plans';
+
+        showMessage(error.message || 'Unable to load data plans.');
+    } finally {
+        loadingPlans = false;
+    }
+};
+
+const closePurchaseModal = () => {
+    if (purchasing) return;
+
+    purchaseModal.classList.remove('show');
+    selectedPlan = null;
+};
+
+const resetModal = () => {
+    modalTitle.textContent = 'Confirm Data Purchase';
+    modalDescription.textContent = 'Confirm the details before continuing.';
+    phoneField.style.display = 'block';
+    confirmActions.style.display = 'flex';
+    closeButton.style.display = 'none';
+};
+
+const submitPurchase = async () => {
+    if (purchasing || !selectedPlan) return;
+
+    const phone = phoneInput.value.trim();
+
+    if (!/^0\d{10}$/.test(phone)) {
+        showMessage('Enter a valid 11-digit phone number.');
+        phoneInput.focus();
+        return;
+    }
+
+    if (!selectedPlan.plan_id) {
+        showMessage('The selected plan does not have a valid plan ID.');
+        return;
+    }
+
+    const network = networkSelect.value;
+
+    if (!network) {
+        showMessage('Please select a network.');
+        return;
+    }
+
+    const confirmed = window.confirm(
+        `Buy ${selectedPlan.datasize} for ${phone} at ${formatPrice(selectedPlan.price)}?`
+    );
+
+    if (!confirmed) return;
+
+    purchasing = true;
+    confirmButton.disabled = true;
+    confirmButton.textContent = 'Processing...';
+    clearMessage();
+
+    try {
+        const response = await fetch('/purchase-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'CSRF-Token': csrfToken
+            },
+            body: JSON.stringify({
+                phone,
+                network,
+                planId: selectedPlan.plan_id,
+                _csrf: csrfToken
+            })
         });
 
-        purchaseModal.addEventListener('click', event => {
-            if (event.target === purchaseModal) {
-                purchaseModal.hidden = true;
-            }
-        });
+        const result = await response.json();
 
-        function getPlansArray(result) {
-            if (Array.isArray(result.data)) return result.data;
-            if (Array.isArray(result.plans)) return result.plans;
-            return [];
+        if (!response.ok || !result.status) {
+            throw new Error(getErrorMessage(result));
         }
 
-        async function fetchPlans() {
-            if (loadingPlans || purchasing) return;
+        const transactionStatus = result.transactionStatus;
 
-            loadingPlans = true;
-            fetchButton.disabled = true;
-            fetchButton.textContent = 'Loading...';
+        phoneField.style.display = 'none';
+        confirmActions.style.display = 'none';
+        closeButton.style.display = 'block';
 
-            message.textContent = '';
-            plansContainer.replaceChildren();
-            purchaseSection.hidden = true;
-            selectedPlan = null;
-
-            const loadingText = document.createElement('p');
-            loadingText.textContent = 'Loading available plans...';
-            plansContainer.appendChild(loadingText);
-
-            try {
-                const response = await fetch('/fetch-data-plans', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({
-                        network: networkInput.value,
-                        type: typeInput.value,
-                        _csrf: csrfToken
-                    })
-                });
-
-                const result = await response.json();
-
-                if (!response.ok || !result.status) {
-                    throw new Error(
-                        result.message || 'Unable to fetch data plans.'
-                    );
-                }
-
-                const plans = getPlansArray(result);
-
-                plansContainer.replaceChildren();
-
-                if (!plans.length) {
-                    message.textContent = 'No plans found for this selection.';
-                    return;
-                }
-
-                plans.forEach(plan => {
-                    const card = document.createElement('article');
-                    card.className = 'plan-card';
-
-                    const name = document.createElement('h3');
-                    name.textContent = plan.datasize || 'Data Plan';
-
-                    const planType = document.createElement('p');
-                    planType.textContent =
-                        `Plan Type: ${plan.type || 'N/A'}`;
-
-                    const price = document.createElement('p');
-                    price.textContent =
-                        `₦${Number(plan.price).toLocaleString('en-NG')}`;
-
-                    const validity = document.createElement('p');
-                    validity.textContent =
-                        `${plan.day || 'N/A'} days validity`;
-
-                    const network = document.createElement('p');
-                    network.textContent =
-                        `Network: ${plan.network || 'N/A'}`;
-
-                    const buyButton = document.createElement('button');
-                    buyButton.type = 'button';
-                    buyButton.textContent = 'Buy Now';
-
-                    buyButton.addEventListener('click', () => {
-                        selectedPlan = plan;
-
-                        selectedPlanElement.replaceChildren();
-
-                        const heading = document.createElement('h3');
-                        heading.textContent =
-                            `${plan.network} - ${plan.datasize}`;
-
-                        const amount = document.createElement('p');
-                        amount.textContent =
-                            `Amount: ₦${Number(plan.price).toLocaleString('en-NG')}`;
-
-                        selectedPlanElement.append(heading, amount);
-
-                        purchaseMessage.textContent = '';
-                        purchaseSection.hidden = false;
-
-                        purchaseSection.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    });
-
-                    card.append(
-                        name,
-                        planType,
-                        price,
-                        validity,
-                        network,
-                        buyButton
-                    );
-
-                    plansContainer.appendChild(card);
-                });
-
-                message.textContent = `${plans.length} data plan(s) found.`;
-
-            } catch (error) {
-                plansContainer.replaceChildren();
-                message.textContent = error.message;
-
-            } finally {
-                loadingPlans = false;
-                fetchButton.disabled = false;
-                fetchButton.textContent = 'Fetch Data Plans';
-            }
+        if (transactionStatus === 'success') {
+            modalTitle.textContent = 'Purchase Successful';
+            modalDescription.textContent =
+                result.message || 'Your data purchase was successful.';
+        } else {
+            modalTitle.textContent = 'Purchase Pending';
+            modalDescription.textContent =
+                result.message || 'Your purchase is being processed. Check your transaction status before trying again.';
         }
 
-        form.addEventListener('submit', event => {
-            event.preventDefault();
-            fetchPlans();
-        });
+        document.getElementById('detail-phone').textContent = phone;
 
-        networkInput.addEventListener('change', fetchPlans);
-        typeInput.addEventListener('change', fetchPlans);
+    } catch (error) {
+        showMessage(error.message || 'Unable to process your purchase.');
+    } finally {
+        purchasing = false;
+        confirmButton.disabled = false;
+        confirmButton.textContent = 'Confirm Purchase';
+    }
+};
 
-        purchaseForm.addEventListener('submit', async event => {
-            event.preventDefault();
+networkSelect.addEventListener('change', fetchPlans);
+typeSelect.addEventListener('change', fetchPlans);
 
-            if (purchasing) return;
+confirmButton.addEventListener('click', submitPurchase);
+cancelButton.addEventListener('click', closePurchaseModal);
+closeButton.addEventListener('click', closePurchaseModal);
 
-            if (!selectedPlan) {
-                purchaseMessage.textContent = 'Please select a data plan.';
-                return;
-            }
+purchaseModal.addEventListener('click', (event) => {
+    if (event.target === purchaseModal) {
+        closePurchaseModal();
+    }
+});
+</script>
 
-            const phone = phoneInput.value.trim();
-
-            if (!/^0\d{10}$/.test(phone)) {
-                purchaseMessage.textContent =
-                    'Enter a valid 11-digit phone number.';
-                return;
-            }
-
-            const networkId = selectedPlan.network_id ??
-                selectedPlan.networkId;
-
-            if (
-                networkId === undefined ||
-                networkId === null ||
-                !Number.isInteger(Number(networkId))
-            ) {
-                purchaseMessage.textContent =
-                    'The numeric network ID is missing. Please confirm the network ID with Datapea before purchasing.';
-                return;
-            }
-
-            const confirmed = window.confirm(
-                `Confirm purchase of ${selectedPlan.datasize} for ${phone} at ₦${Number(selectedPlan.price).toLocaleString('en-NG')}?`
-            );
-
-            if (!confirmed) return;
-
-            purchasing = true;
-            purchaseButton.disabled = true;
-            purchaseButton.textContent = 'Processing...';
-            purchaseMessage.textContent = '';
-
-            try {
-                const response = await fetch('/purchase-data', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({
-                        phone,
-                        network: String(networkId),
-                        planId: String(selectedPlan.plan_id),
-                        _csrf: csrfToken
-                    })
-                });
-
-                const result = await response.json();
-
-                if (!response.ok || !result.status) {
-                    throw new Error(
-                        result.message || 'Data purchase failed.'
-                    );
-                }
-
-                const apiResult = result.data || {};
-
-                const rawStatus = String(
-                    apiResult.status ||
-                    apiResult.transaction_status ||
-                    apiResult.data?.status ||
-                    ''
-                ).toLowerCase();
-
-                const reference =
-                    apiResult.reference ||
-                    apiResult.transaction_id ||
-                    apiResult.request_id ||
-                    apiResult.data?.reference ||
-                    '';
-
-                if (['success', 'successful', 'completed'].includes(rawStatus)) {
-                    showPurchaseModal(
-                        selectedPlan,
-                        phone,
-                        'Successful',
-                        'Datapea confirmed your data purchase.',
-                        reference
-                    );
-
-                    purchaseForm.reset();
-                } else if (['pending', 'processing'].includes(rawStatus)) {
-                    showPurchaseModal(
-                        selectedPlan,
-                        phone,
-                        'Pending',
-                        'Your request is being processed. Check the transaction status before trying again.',
-                        reference
-                    );
-                } else {
-                    purchaseMessage.textContent =
-                        result.message ||
-                        'The API response did not confirm a successful purchase. Check the transaction status before retrying.';
-                }
-
-            } catch (error) {
-                purchaseMessage.textContent = error.message;
-
-            } finally {
-                purchasing = false;
-                purchaseButton.disabled = false;
-                purchaseButton.textContent = 'Buy Data';
-            }
-        });
-
-        fetchPlans();
-    </script>
-
-    <%- include('../includes/end.ejs') %>
+<%- include('../includes/end.ejs') %>
