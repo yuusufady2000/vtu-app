@@ -10,4 +10,5 @@ router.get('/buy-data', isAuth, servicesController.getDataPage);
 router.post('/fetch-data-plans', isAuth, servicesController.getDataPlans);
 
 router.post('/purchase-data', isAuth, servicesController.postBuyData);
+
 module.exports = router;

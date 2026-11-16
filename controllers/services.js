@@ -1,39 +1,34 @@
 
-const datapea = require('../util/datapea');
+const bilalsadasub = require('../util/bilalsadasub');
 const crypto = require('crypto');
 
 const networkIds = {
-    mtn: 1,
-    airtel: 2,
-    glo: 3,
-    '9mobile': 4
-};
-
-const getPlansArray = (result) => {
-    if (Array.isArray(result)) {
-        return result;
-    }
-
-    if (Array.isArray(result?.data)) {
-        return result.data;
-    }
-
-    if (Array.isArray(result?.plans)) {
-        return result.plans;
-    }
-
-    if (Array.isArray(result?.data?.data)) {
-        return result.data.data;
-    }
-
-    return [];
+    MTN: 1,
+    AIRTEL: 2,
+    GLO: 3,
+    T2: 4,
+    VITEL: 5
 };
 
 const normalizeNetwork = (network) => {
-    const value = String(network || '').trim().toLowerCase();
+    const value = String(network || '').trim().toUpperCase();
 
-    if (value === '9 mobile' || value === '9mobile') {
-        return '9mobile';
+    if (value === '9MOBILE' || value === '9 MOBILE') return 'T2';
+
+    return value;
+};
+
+const getPlansArray = (result) => {
+    if (Array.isArray(result)) return result;
+    if (Array.isArray(result?.data)) return result.data;
+    return [];
+};
+
+const getPlanType = (type) => {
+    const value = String(type || '').trim().toUpperCase();
+
+    if (value === 'CORPORATE GIFTING') {
+        return 'COOPERATE GIFTING';
     }
 
     return value;
@@ -41,17 +36,17 @@ const normalizeNetwork = (network) => {
 
 exports.getDataPage = async (req, res) => {
     try {
-        const result = await datapea.fetchDataPlans();
-        const dataPlans = getPlansArray(result);
+        const result = await bilalsadasub.fetchNetworks();
 
         res.render('shop/data', {
             pageTitle: 'Buy Data',
             path: '/buy-data',
-            dataPlans,
+            networks: getPlansArray(result),
+            dataPlans: [],
             errorMessage: null
         });
     } catch (error) {
-        console.error('DATAPEA PLANS ERROR:', {
+        console.error('BILALSADASUB NETWORK ERROR:', {
             status: error.response?.status,
             data: error.response?.data,
             message: error.message
@@ -60,8 +55,9 @@ exports.getDataPage = async (req, res) => {
         res.render('shop/data', {
             pageTitle: 'Buy Data',
             path: '/buy-data',
+            networks: [],
             dataPlans: [],
-            errorMessage: 'Unable to load data plans. Please try again.'
+            errorMessage: 'Unable to load networks. Please try again.'
         });
     }
 };
@@ -69,32 +65,29 @@ exports.getDataPage = async (req, res) => {
 exports.getDataPlans = async (req, res) => {
     try {
         const network = normalizeNetwork(req.body.network);
-        const type = String(req.body.type || '').trim().toLowerCase();
+        const planType = getPlanType(req.body.type);
 
-        if (!network || !networkIds[network]) {
+        if (!networkIds[network]) {
             return res.status(400).json({
                 status: false,
                 message: 'Please select a valid network.'
             });
         }
 
-        const result = await datapea.fetchDataPlans();
+        const result = await bilalsadasub.fetchDataPlans(
+            network,
+            planType
+        );
+
         const plans = getPlansArray(result);
-
-        const filteredPlans = plans.filter(plan => {
-            const planNetwork = normalizeNetwork(plan.network);
-            const planType = String(plan.type || '').trim().toLowerCase();
-
-            return planNetwork === network && (!type || planType === type);
-        });
 
         return res.status(200).json({
             status: true,
-            count: filteredPlans.length,
-            data: filteredPlans
+            count: plans.length,
+            data: plans
         });
     } catch (error) {
-        console.error('DATAPEA FETCH PLANS ERROR:', {
+        console.error('BILALSADASUB FETCH PLANS ERROR:', {
             status: error.response?.status,
             data: error.response?.data,
             message: error.message
@@ -112,13 +105,12 @@ exports.postBuyData = async (req, res) => {
         const phone = String(req.body.phone || '').trim();
         const networkName = normalizeNetwork(req.body.network);
         const planId = Number(req.body.planId);
-
         const network = networkIds[networkName];
 
-        if (!/^0\d{10}$/.test(phone)) {
+        if (!/^0\d{10}$/.test(phone) && !/^234\d{10}$/.test(phone)) {
             return res.status(400).json({
                 status: false,
-                message: 'Enter a valid 11-digit phone number.'
+                message: 'Enter a valid phone number.'
             });
         }
 
@@ -136,33 +128,32 @@ exports.postBuyData = async (req, res) => {
             });
         }
 
-        const plansResult = await datapea.fetchDataPlans();
+        const plansResult = await bilalsadasub.fetchDataPlans(networkName);
         const plans = getPlansArray(plansResult);
 
         const selectedPlan = plans.find(plan =>
-            Number(plan.plan_id) === planId &&
-            normalizeNetwork(plan.network) === networkName
+            Number(plan.plan_id) === planId
         );
 
         if (!selectedPlan) {
             return res.status(400).json({
                 status: false,
-                message: 'The selected plan is invalid. Please refresh the plans and try again.'
+                message: 'The selected plan is invalid. Refresh the plans and try again.'
             });
         }
 
-        const result = await datapea.purchaseData({
+        const result = await bilalsadasub.purchaseData({
             network,
             phone,
-            planId,
+            dataPlan: planId,
             requestId: `data_${crypto.randomUUID()}`
         });
 
-        const providerStatus = String(
-            result?.status || result?.Status || ''
-        ).trim().toLowerCase();
+        const providerStatus = String(result?.status || '')
+            .trim()
+            .toLowerCase();
 
-        if (providerStatus === 'success' || providerStatus === 'successful') {
+        if (providerStatus === 'success') {
             return res.status(200).json({
                 status: true,
                 transactionStatus: 'success',
@@ -171,7 +162,7 @@ exports.postBuyData = async (req, res) => {
             });
         }
 
-        if (providerStatus === 'pending' || providerStatus === 'processing') {
+        if (providerStatus === 'process') {
             return res.status(200).json({
                 status: true,
                 transactionStatus: 'pending',
@@ -180,15 +171,22 @@ exports.postBuyData = async (req, res) => {
             });
         }
 
+        if (providerStatus === 'fail') {
+            return res.status(200).json({
+                status: false,
+                transactionStatus: 'failed',
+                message: result.message || 'The data purchase failed.',
+                data: result
+            });
+        }
+
         return res.status(502).json({
             status: false,
             transactionStatus: 'unknown',
-            message: result?.message || 'The provider returned an unconfirmed transaction status.',
-            data: result
+            message: 'The provider returned an unrecognized transaction status.'
         });
-
     } catch (error) {
-        console.error('DATAPEA PURCHASE ERROR:', {
+        console.error('BILALSADASUB PURCHASE ERROR:', {
             status: error.response?.status,
             data: error.response?.data,
             message: error.message
@@ -196,7 +194,8 @@ exports.postBuyData = async (req, res) => {
 
         return res.status(error.response?.status || 502).json({
             status: false,
-            message: error.response?.data?.message || 'Unable to process the data purchase.'
+            message: error.response?.data?.message ||
+                'Unable to process the data purchase.'
         });
     }
 };
