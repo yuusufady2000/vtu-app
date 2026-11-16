@@ -10,18 +10,17 @@ const getPlansArray = (result) => {
         return result.data;
     }
 
+    if (Array.isArray(result?.plans)) {
+        return result.plans;
+    }
+
     return [];
 };
 
 exports.getDataPage = async (req, res, next) => {
     try {
         const result = await datapea.fetchDataPlans();
-
         const dataPlans = getPlansArray(result);
-
-        if (!dataPlans.length) {
-            console.log('DATAPEA RESPONSE:', result);
-        }
 
         res.render('shop/data', {
             pageTitle: 'Buy Data',
@@ -31,10 +30,11 @@ exports.getDataPage = async (req, res, next) => {
         });
 
     } catch (error) {
-        console.error(
-            'DATAPEA DATA PLANS ERROR:',
-            error.response?.data || error.message
-        );
+        console.error('DATAPEA PLANS ERROR:', {
+            status: error.response?.status,
+            data: error.response?.data,
+            message: error.message
+        });
 
         res.render('shop/data', {
             pageTitle: 'Buy Data',
@@ -45,11 +45,10 @@ exports.getDataPage = async (req, res, next) => {
     }
 };
 
-exports.getDataPlans = async (req, res, next) => {
+exports.getDataPlans = async (req, res) => {
     try {
-        const network = typeof req.body.network === 'string'
-            ? req.body.network.trim()
-            : '';
+        const network = String(req.body.network || '').trim();
+        const type = String(req.body.type || '').trim();
 
         if (!network) {
             return res.status(400).json({
@@ -61,25 +60,95 @@ exports.getDataPlans = async (req, res, next) => {
         const result = await datapea.fetchDataPlans();
         const plans = getPlansArray(result);
 
-        const filteredPlans = plans.filter(plan =>
-            typeof plan.network === 'string' &&
-            plan.network.toLowerCase() === network.toLowerCase()
-        );
+        const filteredPlans = plans.filter(plan => {
+            const networkMatches =
+                String(plan.network || '').toLowerCase() === network.toLowerCase();
+
+            const typeMatches = !type ||
+                String(plan.type || '').toLowerCase() === type.toLowerCase();
+
+            return networkMatches && typeMatches;
+        });
 
         return res.status(200).json({
             status: true,
+            count: filteredPlans.length,
             data: filteredPlans
         });
 
     } catch (error) {
-        console.error(
-            'DATAPEA FETCH PLANS ERROR:',
-            error.response?.data || error.message
-        );
+        console.error('DATAPEA FETCH PLANS ERROR:', {
+            status: error.response?.status,
+            data: error.response?.data,
+            message: error.message
+        });
 
         return res.status(502).json({
             status: false,
-            message: 'Unable to fetch data plans.'
+            message: 'Unable to fetch data plans.',
+            error: error.response?.data || error.message
+        });
+    }
+};
+
+exports.postBuyData = async (req, res) => {
+    try {
+        const phone = String(req.body.phone || '').trim();
+        const network = req.body.network;
+        const planId = req.body.planId;
+
+        if (!phone || !/^0\d{10}$/.test(phone)) {
+            return res.status(400).json({
+                status: false,
+                message: 'Enter a valid 11-digit phone number.'
+            });
+        }
+
+        if (
+            network === undefined ||
+            network === null ||
+            !Number.isInteger(Number(network))
+        ) {
+            return res.status(400).json({
+                status: false,
+                message: 'A valid numeric network ID is required.'
+            });
+        }
+
+        if (
+            planId === undefined ||
+            planId === null ||
+            !Number.isInteger(Number(planId))
+        ) {
+            return res.status(400).json({
+                status: false,
+                message: 'Please select a valid data plan.'
+            });
+        }
+
+        const result = await datapea.purchaseData({
+            network,
+            phone,
+            planId
+        });
+
+        return res.status(200).json({
+            status: true,
+            message: 'Datapea purchase request submitted.',
+            data: result
+        });
+
+    } catch (error) {
+        console.error('DATAPEA PURCHASE ERROR:', {
+            status: error.response?.status,
+            data: error.response?.data,
+            message: error.message
+        });
+
+        return res.status(error.response?.status || 502).json({
+            status: false,
+            message: 'Unable to process the data purchase.',
+            error: error.response?.data || error.message
         });
     }
 };

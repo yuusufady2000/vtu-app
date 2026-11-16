@@ -9,7 +9,7 @@
     <main class="data-container">
         <section class="data-header">
             <h1>Buy Data</h1>
-            <p>Select your network and explore available data plans.</p>
+            <p>Select your network and data plan type.</p>
         </section>
 
         <section class="data-card">
@@ -24,21 +24,21 @@
 
                 <select id="network" required>
                     <option value="">Choose a network</option>
-
-                    <% if (dataPlans && dataPlans.length > 0) { %>
-                        <% [...new Set(dataPlans.map(plan => plan.network))].filter(Boolean).forEach(network => { %>
-                            <option value="<%= network %>">
-                                <%= network.toUpperCase() %>
-                            </option>
-                        <% }) %>
-                    <% } %>
+                    <option value="MTN" selected>MTN</option>
+                    <option value="Glo">Glo</option>
+                    <option value="Airtel">Airtel</option>
+                    <option value="9mobile">9mobile</option>
                 </select>
 
-                <button
-                    type="submit"
-                    id="fetch-button"
-                    <%= !dataPlans || !dataPlans.length ? 'disabled' : '' %>
-                >
+                <label for="type">Select Plan Type</label>
+
+                <select id="type" required>
+                    <option value="SME" selected>SME</option>
+                    <option value="Corporate">Corporate</option>
+                    <option value="Gifting">Gifting</option>
+                </select>
+
+                <button type="submit" id="fetch-button">
                     Fetch Data Plans
                 </button>
             </form>
@@ -53,7 +53,7 @@
 
             <div id="plans-container" class="plans-container">
                 <p class="empty-message">
-                    Select a network to view available data plans.
+                    Select a network and plan type to view available plans.
                 </p>
             </div>
         </section>
@@ -62,18 +62,18 @@
     <script>
         const form = document.getElementById('data-form');
         const networkInput = document.getElementById('network');
+        const typeInput = document.getElementById('type');
         const button = document.getElementById('fetch-button');
         const message = document.getElementById('message');
         const plansContainer = document.getElementById('plans-container');
         const csrfToken = document.getElementById('csrf-token').value;
 
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-
+        async function fetchPlans() {
             const network = networkInput.value;
+            const type = typeInput.value;
 
-            if (!network) {
-                message.textContent = 'Please select a network.';
+            if (!network || !type) {
+                message.textContent = 'Please select a network and plan type.';
                 return;
             }
 
@@ -90,6 +90,7 @@
                     },
                     body: new URLSearchParams({
                         network,
+                        type,
                         _csrf: csrfToken
                     })
                 });
@@ -97,15 +98,13 @@
                 const result = await response.json();
 
                 if (!response.ok || !result.status) {
-                    throw new Error(
-                        result.message || 'Unable to fetch data plans.'
-                    );
+                    throw new Error(result.message || 'Unable to fetch data plans.');
                 }
 
                 const plans = result.data || [];
 
                 if (!plans.length) {
-                    message.textContent = 'No data plans were found for this network.';
+                    message.textContent = 'No plans found for this network and plan type.';
                     return;
                 }
 
@@ -116,33 +115,23 @@
                     const name = document.createElement('h3');
                     name.textContent = plan.datasize || 'Data Plan';
 
-                    const type = document.createElement('p');
-                    type.textContent = `Plan Type: ${plan.type || 'N/A'}`;
+                    const typeText = document.createElement('p');
+                    typeText.textContent = `Plan Type: ${plan.type || 'N/A'}`;
 
                     const price = document.createElement('p');
-                    price.textContent =
-                        `₦${Number(plan.price).toLocaleString('en-NG')}`;
+                    price.textContent = `₦${Number(plan.price).toLocaleString('en-NG')}`;
 
                     const validity = document.createElement('p');
-                    validity.textContent =
-                        `${plan.day || 'N/A'} days validity`;
+                    validity.textContent = `${plan.day || 'N/A'} days validity`;
 
-                    const network = document.createElement('p');
-                    network.textContent =
-                        `Network: ${plan.network || 'N/A'}`;
+                    const networkText = document.createElement('p');
+                    networkText.textContent = `Network: ${plan.network || 'N/A'}`;
 
-                    card.append(
-                        name,
-                        type,
-                        price,
-                        validity,
-                        network
-                    );
-
+                    card.append(name, typeText, price, validity, networkText);
                     plansContainer.appendChild(card);
                 });
 
-                message.textContent = 'Data plans fetched successfully.';
+                message.textContent = `${plans.length} data plan(s) found.`;
 
             } catch (error) {
                 message.textContent = error.message;
@@ -150,9 +139,17 @@
                 button.disabled = false;
                 button.textContent = 'Fetch Data Plans';
             }
+        }
+
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+            fetchPlans();
         });
+
+        networkInput.addEventListener('change', fetchPlans);
+        typeInput.addEventListener('change', fetchPlans);
+
+        fetchPlans();
     </script>
 
     <%- include('../includes/end.ejs') %>
-</body>
-</html>

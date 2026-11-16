@@ -1,11 +1,12 @@
 
 const axios = require('axios');
+const crypto = require('crypto');
 
 const datapea = axios.create({
-    baseURL: 'https://datapea.com/api',
+    baseURL: process.env.DATAPEA_BASE_URL || 'https://datapea.com/api',
     timeout: 30000,
     headers: {
-        Authorization: `Token ${process.env.DATAPEA_API_KEY}`,
+        Authorization: `${process.env.DATAPEA_AUTH_SCHEME || 'Token'} ${process.env.DATAPEA_API_KEY}`,
         'Content-Type': 'application/json',
         Accept: 'application/json'
     }
@@ -21,7 +22,7 @@ exports.purchaseData = async ({ network, phone, planId, requestId }) => {
         network: Number(network),
         phone,
         plan_id: Number(planId),
-        'request-id': requestId
+        'request-id': requestId || `data_${crypto.randomUUID()}`
     });
 
     return response.data;
