@@ -126,11 +126,12 @@ exports.postBuyData = async (req, res) => {
             });
         }
 
-        const result = await datapea.purchaseData({
-            network,
-            phone,
-            planId
-        });
+       const result = await datapea.purchaseData({
+    network,
+    phone,
+    plan: planId,
+    requestId: `data_${require('crypto').randomUUID()}`
+});
 
         return res.status(200).json({
             status: true,

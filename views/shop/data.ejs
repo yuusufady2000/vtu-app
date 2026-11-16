@@ -1,7 +1,22 @@
 
 <%- include('../includes/head.ejs') %>
 <link rel="stylesheet" href="/css/dash.css">
+
 <style>
+    .plan-card button,
+    #fetch-button,
+    #purchase-button {
+        cursor: pointer;
+    }
+
+    .plan-card button:disabled,
+    #fetch-button:disabled,
+    #purchase-button:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+    }
+
+    #purchase-section[hidden],
     .purchase-modal[hidden] {
         display: none;
     }
@@ -14,7 +29,7 @@
         align-items: center;
         justify-content: center;
         padding: 20px;
-        background: rgba(0, 0, 0, 0.65);
+        background: rgba(0, 0, 0, .65);
     }
 
     .purchase-modal-content {
@@ -25,7 +40,7 @@
         background: #fff;
         color: #222;
         text-align: center;
-        animation: modalShow 0.25s ease;
+        animation: modalShow .25s ease;
     }
 
     .success-icon {
@@ -42,13 +57,9 @@
         font-weight: bold;
     }
 
-    .purchase-modal-content h2 {
-        margin-bottom: 8px;
-    }
-
-    .purchase-modal-content > p {
-        color: #666;
-        margin-bottom: 22px;
+    .pending-icon {
+        background: #fff4dc;
+        color: #b7791f;
     }
 
     .transaction-details {
@@ -88,30 +99,6 @@
         background: #16a34a;
         color: white;
         font-weight: 600;
-        cursor: pointer;
-    }
-
-    .plan-card button {
-        width: 100%;
-        margin-top: 12px;
-        padding: 12px;
-        border: none;
-        border-radius: 8px;
-        background: #16a34a;
-        color: white;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-    .plan-card button:disabled,
-    #fetch-button:disabled,
-    #purchase-button:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
-    #purchase-section[hidden] {
-        display: none;
     }
 
     @keyframes modalShow {
@@ -119,7 +106,6 @@
             opacity: 0;
             transform: translateY(15px);
         }
-
         to {
             opacity: 1;
             transform: translateY(0);
@@ -139,14 +125,9 @@
 
         <section class="data-card">
             <form id="data-form">
-                <input
-                    type="hidden"
-                    id="csrf-token"
-                    value="<%= csrfToken %>"
-                >
+                <input type="hidden" id="csrf-token" value="<%= csrfToken %>">
 
                 <label for="network">Select Network</label>
-
                 <select id="network" required>
                     <option value="MTN" selected>MTN</option>
                     <option value="Glo">Glo</option>
@@ -155,7 +136,6 @@
                 </select>
 
                 <label for="type">Select Plan Type</label>
-
                 <select id="type" required>
                     <option value="SME" selected>SME</option>
                     <option value="Corporate">Corporate</option>
@@ -174,7 +154,7 @@
             <h2>Available Data Plans</h2>
 
             <div id="plans-container" class="plans-container">
-                <p class="empty-message">Loading data plans...</p>
+                <p>Loading data plans...</p>
             </div>
         </section>
 
@@ -205,15 +185,12 @@
         </section>
     </main>
 
-    <div class="purchase-modal" id="success-modal" hidden>
+    <div class="purchase-modal" id="purchase-modal" hidden>
         <div class="purchase-modal-content">
-            <div class="success-icon">✓</div>
+            <div class="success-icon" id="modal-icon">✓</div>
 
             <h2 id="modal-title">Purchase Successful!</h2>
-
-            <p id="modal-description">
-                Your data purchase was successful.
-            </p>
+            <p id="modal-description"></p>
 
             <div class="transaction-details">
                 <div>
@@ -240,6 +217,11 @@
                     <span>Status</span>
                     <strong id="modal-status"></strong>
                 </div>
+
+                <div id="reference-row" hidden>
+                    <span>Reference</span>
+                    <strong id="modal-reference"></strong>
+                </div>
             </div>
 
             <button type="button" id="close-modal">Done</button>
@@ -258,67 +240,90 @@
         const purchaseForm = document.getElementById('purchase-form');
         const purchaseButton = document.getElementById('purchase-button');
         const purchaseMessage = document.getElementById('purchase-message');
-        const selectedPlan = document.getElementById('selected-plan');
+        const selectedPlanElement = document.getElementById('selected-plan');
         const phoneInput = document.getElementById('phone');
 
-        const successModal = document.getElementById('success-modal');
+        const purchaseModal = document.getElementById('purchase-modal');
         const closeModal = document.getElementById('close-modal');
-
-        const modalTitle = document.getElementById('modal-title');
-        const modalDescription = document.getElementById('modal-description');
-        const modalNetwork = document.getElementById('modal-network');
-        const modalPlan = document.getElementById('modal-plan');
-        const modalPhone = document.getElementById('modal-phone');
-        const modalPrice = document.getElementById('modal-price');
-        const modalStatus = document.getElementById('modal-status');
+        const modalIcon = document.getElementById('modal-icon');
 
         const csrfToken = document.getElementById('csrf-token').value;
 
-        let selectedPlanData = null;
+        let selectedPlan = null;
+        let loadingPlans = false;
+        let purchasing = false;
 
-        function showModal(plan, phone, status, description) {
-            modalNetwork.textContent = plan.network || networkInput.value;
-            modalPlan.textContent = plan.datasize || 'Data Plan';
-            modalPhone.textContent = phone;
-            modalPrice.textContent =
+        function showPurchaseModal(plan, phone, status, description, reference) {
+            const successful = status === 'Successful';
+
+            modalIcon.textContent = successful ? '✓' : '!';
+            modalIcon.className = successful
+                ? 'success-icon'
+                : 'success-icon pending-icon';
+
+            document.getElementById('modal-title').textContent =
+                successful ? 'Purchase Successful!' : 'Purchase Pending';
+
+            document.getElementById('modal-description').textContent =
+                description;
+
+            document.getElementById('modal-network').textContent =
+                plan.network || networkInput.value;
+
+            document.getElementById('modal-plan').textContent =
+                plan.datasize || 'Data Plan';
+
+            document.getElementById('modal-phone').textContent = phone;
+
+            document.getElementById('modal-price').textContent =
                 `₦${Number(plan.price).toLocaleString('en-NG')}`;
-            modalStatus.textContent = status;
 
-            if (status.toLowerCase() === 'successful') {
-                modalTitle.textContent = 'Purchase Successful!';
+            document.getElementById('modal-status').textContent = status;
+
+            const referenceRow = document.getElementById('reference-row');
+
+            if (reference) {
+                document.getElementById('modal-reference').textContent =
+                    reference;
+                referenceRow.hidden = false;
             } else {
-                modalTitle.textContent = 'Purchase Pending';
+                referenceRow.hidden = true;
             }
 
-            modalDescription.textContent = description;
-            successModal.hidden = false;
+            purchaseModal.hidden = false;
         }
 
         closeModal.addEventListener('click', () => {
-            successModal.hidden = true;
+            purchaseModal.hidden = true;
         });
 
-        successModal.addEventListener('click', event => {
-            if (event.target === successModal) {
-                successModal.hidden = true;
+        purchaseModal.addEventListener('click', event => {
+            if (event.target === purchaseModal) {
+                purchaseModal.hidden = true;
             }
         });
 
-        async function fetchPlans() {
-            const network = networkInput.value;
-            const type = typeInput.value;
+        function getPlansArray(result) {
+            if (Array.isArray(result.data)) return result.data;
+            if (Array.isArray(result.plans)) return result.plans;
+            return [];
+        }
 
+        async function fetchPlans() {
+            if (loadingPlans || purchasing) return;
+
+            loadingPlans = true;
             fetchButton.disabled = true;
             fetchButton.textContent = 'Loading...';
+
             message.textContent = '';
             plansContainer.replaceChildren();
-
             purchaseSection.hidden = true;
-            selectedPlanData = null;
+            selectedPlan = null;
 
-            const loading = document.createElement('p');
-            loading.textContent = 'Loading available plans...';
-            plansContainer.appendChild(loading);
+            const loadingText = document.createElement('p');
+            loadingText.textContent = 'Loading available plans...';
+            plansContainer.appendChild(loadingText);
 
             try {
                 const response = await fetch('/fetch-data-plans', {
@@ -327,8 +332,8 @@
                         'Content-Type': 'application/x-www-form-urlencoded'
                     },
                     body: new URLSearchParams({
-                        network,
-                        type,
+                        network: networkInput.value,
+                        type: typeInput.value,
                         _csrf: csrfToken
                     })
                 });
@@ -341,9 +346,9 @@
                     );
                 }
 
-                plansContainer.replaceChildren();
+                const plans = getPlansArray(result);
 
-                const plans = result.data || [];
+                plansContainer.replaceChildren();
 
                 if (!plans.length) {
                     message.textContent = 'No plans found for this selection.';
@@ -378,19 +383,19 @@
                     buyButton.textContent = 'Buy Now';
 
                     buyButton.addEventListener('click', () => {
-                        selectedPlanData = plan;
+                        selectedPlan = plan;
 
-                        selectedPlan.replaceChildren();
+                        selectedPlanElement.replaceChildren();
 
-                        const planName = document.createElement('h3');
-                        planName.textContent =
+                        const heading = document.createElement('h3');
+                        heading.textContent =
                             `${plan.network} - ${plan.datasize}`;
 
-                        const planPrice = document.createElement('p');
-                        planPrice.textContent =
+                        const amount = document.createElement('p');
+                        amount.textContent =
                             `Amount: ₦${Number(plan.price).toLocaleString('en-NG')}`;
 
-                        selectedPlan.append(planName, planPrice);
+                        selectedPlanElement.append(heading, amount);
 
                         purchaseMessage.textContent = '';
                         purchaseSection.hidden = false;
@@ -417,14 +422,10 @@
 
             } catch (error) {
                 plansContainer.replaceChildren();
-
-                const errorText = document.createElement('p');
-                errorText.textContent = error.message;
-                plansContainer.appendChild(errorText);
-
                 message.textContent = error.message;
 
             } finally {
+                loadingPlans = false;
                 fetchButton.disabled = false;
                 fetchButton.textContent = 'Fetch Data Plans';
             }
@@ -441,7 +442,9 @@
         purchaseForm.addEventListener('submit', async event => {
             event.preventDefault();
 
-            if (!selectedPlanData) {
+            if (purchasing) return;
+
+            if (!selectedPlan) {
                 purchaseMessage.textContent = 'Please select a data plan.';
                 return;
             }
@@ -454,7 +457,8 @@
                 return;
             }
 
-            const networkId = selectedPlanData.network_id;
+            const networkId = selectedPlan.network_id ??
+                selectedPlan.networkId;
 
             if (
                 networkId === undefined ||
@@ -462,16 +466,17 @@
                 !Number.isInteger(Number(networkId))
             ) {
                 purchaseMessage.textContent =
-                    'The numeric network ID is missing from the plan response. Please confirm the correct network ID with Datapea.';
+                    'The numeric network ID is missing. Please confirm the network ID with Datapea before purchasing.';
                 return;
             }
 
             const confirmed = window.confirm(
-                `Purchase ${selectedPlanData.datasize} for ${phone} at ₦${Number(selectedPlanData.price).toLocaleString('en-NG')}?`
+                `Confirm purchase of ${selectedPlan.datasize} for ${phone} at ₦${Number(selectedPlan.price).toLocaleString('en-NG')}?`
             );
 
             if (!confirmed) return;
 
+            purchasing = true;
             purchaseButton.disabled = true;
             purchaseButton.textContent = 'Processing...';
             purchaseMessage.textContent = '';
@@ -484,8 +489,8 @@
                     },
                     body: new URLSearchParams({
                         phone,
-                        planId: selectedPlanData.plan_id,
-                        network: networkId,
+                        network: String(networkId),
+                        planId: String(selectedPlan.plan_id),
                         _csrf: csrfToken
                     })
                 });
@@ -499,47 +504,50 @@
                 }
 
                 const apiResult = result.data || {};
-                const apiStatus = String(
-                    apiResult.status || apiResult.transaction_status || ''
+
+                const rawStatus = String(
+                    apiResult.status ||
+                    apiResult.transaction_status ||
+                    apiResult.data?.status ||
+                    ''
                 ).toLowerCase();
 
-                const isSuccessful = [
-                    'success',
-                    'successful',
-                    'completed'
-                ].includes(apiStatus);
+                const reference =
+                    apiResult.reference ||
+                    apiResult.transaction_id ||
+                    apiResult.request_id ||
+                    apiResult.data?.reference ||
+                    '';
 
-                const isPending = [
-                    'pending',
-                    'processing'
-                ].includes(apiStatus);
-
-                if (isSuccessful) {
-                    showModal(
-                        selectedPlanData,
+                if (['success', 'successful', 'completed'].includes(rawStatus)) {
+                    showPurchaseModal(
+                        selectedPlan,
                         phone,
                         'Successful',
-                        'Your data purchase has been confirmed.'
+                        'Datapea confirmed your data purchase.',
+                        reference
                     );
-                } else if (isPending) {
-                    showModal(
-                        selectedPlanData,
+
+                    purchaseForm.reset();
+                } else if (['pending', 'processing'].includes(rawStatus)) {
+                    showPurchaseModal(
+                        selectedPlan,
                         phone,
                         'Pending',
-                        'Your purchase request is being processed. Check your transaction status before retrying.'
+                        'Your request is being processed. Check the transaction status before trying again.',
+                        reference
                     );
                 } else {
                     purchaseMessage.textContent =
-                        result.message || 'The provider accepted the request, but the final transaction status is not confirmed.';
-                    return;
+                        result.message ||
+                        'The API response did not confirm a successful purchase. Check the transaction status before retrying.';
                 }
-
-                purchaseForm.reset();
 
             } catch (error) {
                 purchaseMessage.textContent = error.message;
 
             } finally {
+                purchasing = false;
                 purchaseButton.disabled = false;
                 purchaseButton.textContent = 'Buy Data';
             }
