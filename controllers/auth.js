@@ -75,82 +75,27 @@ exports.postSignup = (req, res, next) => {
         : '';
 
     const password = req.body.password;
-    const confirmPassword = req.body.confirmPassword;
-
-    if (!name || !userName || !phoneNumber || !email ||
-        typeof password !== 'string' ||
-        typeof confirmPassword !== 'string' ||
-        !password || !confirmPassword) {
-        req.flash('error', 'All fields are required.');
-        return res.redirect('/signup');
+    const errors = validationResult(req);
+    if(!errors.isEmpty()) {
+      return res.status(422).
+      render('auth/signup', {
+        path: '/signup',
+        pageTitle: 'Signup',
+        errorMessage: errors.array()[0].msg
+    });
     }
-
-    if (name.length > 80) {
-        req.flash('error', 'Name is too long.');
-        return res.redirect('/signup');
-    }
-
-    if (!/^[a-z0-9_.]{3,20}$/.test(userName)) {
-        req.flash('error', 'Username must be 3–20 characters and contain only letters, numbers, dots or underscores.');
-        return res.redirect('/signup');
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        req.flash('error', 'Please enter a valid email address.');
-        return res.redirect('/signup');
-    }
-
-    if (!/^\+?[0-9]{7,15}$/.test(phoneNumber)) {
-        req.flash('error', 'Please enter a valid phone number.');
-        return res.redirect('/signup');
-    }
-
-    if (password !== confirmPassword) {
-        req.flash('error', 'Passwords do not match.');
-        return res.redirect('/signup');
-    }
-
-    if (password.length < 8 || Buffer.byteLength(password, 'utf8') > 72) {
-        req.flash('error', 'Password must be at least 8 characters and no more than 72 bytes.');
-        return res.redirect('/signup');
-    }
-
-    User.findOne({
-        $or: [
-            { email },
-            { phoneNumber },
-            { userName }
-        ]
-    })
-        .select('email phoneNumber userName')
-        .lean()
-        .then(existingUser => {
-            if (existingUser) {
-                if (existingUser.email === email) {
-                    req.flash('error', 'This email address is already registered.');
-                } else if (existingUser.phoneNumber === phoneNumber) {
-                    req.flash('error', 'This phone number is already registered.');
-                } else {
-                    req.flash('error', 'This username is already taken.');
-                }
-
-                res.redirect('/signup');
-                return null;
-            }
-
-            return bcrypt.hash(password, 12)
+           bcrypt.hash(password, 12)
                 .then(hashedPassword => {
                     const user = new User({
                         name,
                         userName,
                         phoneNumber,
-                        email,
+                     email,
                         password: hashedPassword
                     });
 
                     return user.save();
-                });
-        })
+                })
         .then(user => {
             if (!user) return;
 
