@@ -15,12 +15,8 @@ exports.getLogin = (req, res, next) => {
         errorMessage: errorMessages.length ? errorMessages[0] : null,
         successMessage: successMessages.length ? successMessages[0] : null,
           oldInput: {
-            name:'',
-            userName:'',
             email: '',
-            phoneNumber: '',
-            password: '',
-            confirmPassword: ''
+            password: ''
         }
     });
 };
