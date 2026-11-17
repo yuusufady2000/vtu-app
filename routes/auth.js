@@ -30,7 +30,7 @@ router.post('/signup',check('email').isEmail().withMessage('Please enter a valid
                 }
             });
 }),
-body()
+body('phoneNumber')
 .custom((value, {req}) => {
     return User.findOne({phoneNumber: value})
     .select('_id')
@@ -41,7 +41,7 @@ body()
                 }
             })
 }),
-body()
+body('userName')
 .custom((value, {req}) => {
     return User.findOne({userName: value})
     .select('_id')
