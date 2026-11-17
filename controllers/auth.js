@@ -14,7 +14,14 @@ exports.getLogin = (req, res, next) => {
         pageTitle: 'Login',
         errorMessage: errorMessages.length ? errorMessages[0] : null,
         successMessage: successMessages.length ? successMessages[0] : null,
-        isAuthenticated: false
+          oldInput: {
+            name:'',
+            userName:'',
+            email: '',
+            phoneNumber: '',
+            password: '',
+            confirmPassword: ''
+        }
     });
 };
 
@@ -26,13 +33,33 @@ exports.getSignup = (req, res, next) => {
         path: '/signup',
         pageTitle: 'Signup',
         errorMessage: errorMessages.length ? errorMessages[0] : null,
-        successMessage: successMessages.length ? successMessages[0] : null
+        successMessage: successMessages.length ? successMessages[0] : null,
+        oldInput: {
+            name:'',
+            userName:'',
+            email: '',
+            phoneNumber: '',
+            password: '',
+            confirmPassword: ''
+        }
     });
 };
 
   exports.postLogin = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
+
+  const errors = validationResult(req);
+    if(!errors.isEmpty()) {
+      return res.status(422).
+      render('shop/login', {
+        path: '/login',
+        pageTitle: 'Login',
+        errorMessage: errors.array()[0].msg,
+        oldInput: {email: email, password: password}
+    });
+    }
+
   User.findOne({ email: email })
     .then(user => {
       if (!user) {
@@ -81,10 +108,11 @@ exports.postSignup = (req, res, next) => {
       render('auth/signup', {
         path: '/signup',
         pageTitle: 'Signup',
-        errorMessage: errors.array()[0].msg
+        errorMessage: errors.array()[0].msg,
+        oldInput: {name:name,userName:userName, phoneNumber:phoneNumber,email: email, password: password, confirmPassword: req.body.confirmPassword}
     });
     }
-           bcrypt.hash(password, 12)
+    bcrypt.hash(password, 12)
                 .then(hashedPassword => {
                     const user = new User({
                         name,
