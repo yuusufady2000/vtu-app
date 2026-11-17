@@ -97,6 +97,7 @@ exports.postSignup = (req, res, next) => {
     const phoneNumber = typeof req.body.phoneNumber === 'string'
         ? req.body.phoneNumber.trim()
         : '';
+        console.log('Phone received', JSON.stringify(req.body.phoneNumber))
     const email = typeof req.body.email === 'string'
         ? req.body.email.trim().toLowerCase()
         : '';
