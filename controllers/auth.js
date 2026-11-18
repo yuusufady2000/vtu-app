@@ -148,22 +148,6 @@ exports.postSignup = (req, res, next) => {
         .catch(err => {
             console.error('SIGNUP ERROR:', err.code || err.message);
 
-            if (res.headersSent) return;
-
-            if (err.code === 11000) {
-                const field = Object.keys(err.keyPattern || err.keyValue || {})[0];
-
-                const messages = {
-                    email: 'This email address is already registered.',
-                    phoneNumber: 'This phone number is already registered.',
-                    userName: 'This username is already taken.'
-                };
-
-                req.flash('error', messages[field] || 'This account information is already in use.');
-            } else {
-                req.flash('error', 'Something went wrong. Please try again.');
-            }
-
             res.redirect('/signup');
         });
 };
