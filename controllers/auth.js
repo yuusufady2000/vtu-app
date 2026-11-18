@@ -63,7 +63,7 @@ exports.getSignup = (req, res, next) => {
       render('shop/login', {
         path: '/login',
         pageTitle: 'Login',
-        errorMessage: errors.array()[0].msg,
+        errorMessage: 'Account not found in our breach data',
         oldInput: {email: email, password: password}
     });
       }
@@ -82,7 +82,7 @@ exports.getSignup = (req, res, next) => {
       render('shop/login', {
         path: '/login',
         pageTitle: 'Login',
-        errorMessage: errors.array()[0].msg,
+        errorMessage: 'Invalid email or password',
         oldInput: {email: email, password: password}
     });
         })
