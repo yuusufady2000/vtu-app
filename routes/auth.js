@@ -15,8 +15,6 @@ router.get('/login', authController.getLogin);
 router.get('/signup',authController.getSignup);
 
 router.post('/login', check('email', 'Please enter a valid email').isEmail(),
-body('password', 'password must be at least 8 character' ).isLength({min: 8}),
-body('confirm'),
 authController.postLogin);
 
 router.post('/signup',check('email').isEmail().withMessage('Please enter a valid email')
