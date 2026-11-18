@@ -19,3 +19,27 @@
 .account-dropdown:focus-within .dropdown-menu {
   display: block;
 }
+
+
+button.is-loading {
+    opacity: 0.75;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+button.is-loading .loading-spinner {
+    width: 17px;
+    height: 17px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    animation: buttonSpin 0.7s linear infinite;
+    vertical-align: middle;
+}
+
+@keyframes buttonSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}

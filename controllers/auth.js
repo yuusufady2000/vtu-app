@@ -209,7 +209,7 @@ exports.postForgotPassword = (req, res, next) => {
                 User.findOne({ email })
             .then(user => {
                 if (!user) {
-                                        req.flash('error', 'Email account not found.');
+                                        req.flash('error', 'Email account not found in our breach data.');
                                         res.redirect('/forgot-password');
                     return null;
                 }
