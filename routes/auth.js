@@ -29,18 +29,18 @@ router.post('/signup',check('email').isEmail().withMessage('Please enter a valid
             });
 }),
 body('phoneNumber')
-    // .trim()
-    // .customSanitizer(value => {
-    //     let phone = String(value).replace(/[\s-]/g, '');
+    .trim()
+    .customSanitizer(value => {
+        let phone = String(value).replace(/[\s-]/g, '');
 
-    //     if (phone.startsWith('+234')) {
-    //         phone = '0' + phone.slice(4);
-    //     } else if (phone.startsWith('234')) {
-    //         phone = '0' + phone.slice(3);
-    //     }
+        if (phone.startsWith('+234')) {
+            phone = '0' + phone.slice(4);
+        } else if (phone.startsWith('234')) {
+            phone = '0' + phone.slice(3);
+        }
 
-    //     return phone;
-    // })
+        return phone;
+    })
     .isLength({ min: 11, max: 11 })
     .withMessage('Phone number must be 11 digits')
     .bail()

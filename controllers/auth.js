@@ -215,18 +215,19 @@ exports.postForgotPassword = (req, res, next) => {
                 }
 
              user.resetToken = token;
-               user.resetExpire = Date.now() + 3600000;
+               user.resetExpire = Date.now() + 36000;
                   return user.save()
                     .then(() => sendMail({
                     to: email,
                     from: process.env.SENDGRID_EMAIL,
                     subject: 'Zeal Data Password Reset',
-                    text: `Use this link to reset your password: ${resetUrl}. This link expires in one hour.`,
+                    text: `Use this link to reset your password: ${resetUrl}. This link expires in three minutes.`,
                     html: `
                         <h2>Password Reset</h2>
                         <p>Click the link below to reset your password:</p>
                         <a href="https://vtu-app-1-lw64.onrender.com/forgot-password/${token}">Reset Password</a>
-                        <p>This link expires in one hour.</p>
+                        <p>This link expires in three minutes.</p>
+                        <p>If you didnt request for it, ignore it or change your password in settings, or contact support</p>
                     `
                 }).then(() => {
                     req.flash('success', 'A password reset link has been sent to your email.');
