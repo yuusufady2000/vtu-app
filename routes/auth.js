@@ -29,33 +29,37 @@ router.post('/signup',check('email').isEmail().withMessage('Please enter a valid
             });
 }),
 body('phoneNumber')
-  .trim()
-  .customSanitizer(value => {
-    let p = String(value).replace(/[\s-]/g, ''); 
-    if (p.startsWith('+234')) {
-      p = '0' + p.slice(4);
-    }
-    if (p.startsWith('234') && p.length === 13) {
-      p = '0' + p.slice(3);
-    }
-    return p;
-  })
-  .isLength({ min: 11, max: 11 })
-  .withMessage('Phone number must be 11 digits')
-  .bail() 
-  .matches(/^0[789][01]\d{8}$/)
-  .withMessage('Enter a valid Nigerian phone number')
-  .bail() 
-  .custom((value, { req }) => {
-    return User.findOne({ phoneNumber: value })
-      .select('_id')
-      .lean()
-      .then(existingUser => {
-        if (existingUser) {
-          return Promise.reject('Phonenumber already registered, please use another');
+    .trim()
+    .customSanitizer(value => {
+        let phone = String(value).replace(/[\s-]/g, '');
+
+        if (phone.startsWith('+234')) {
+            phone = '0' + phone.slice(4);
+        } else if (phone.startsWith('234')) {
+            phone = '0' + phone.slice(3);
         }
-      });
-  }),
+
+        return phone;
+    })
+    .isLength({ min: 11, max: 11 })
+    .withMessage('Phone number must be 11 digits')
+    .bail()
+    .matches(/^0[789][01]\d{8}$/)
+    .withMessage('Enter a valid Nigerian phone number')
+    .bail()
+    .custom(async (value) => {
+        const existingUser = await User.findOne({
+            phoneNumber: value
+        })
+            .select('_id')
+            .lean();
+
+        if (existingUser) {
+            throw new Error('Phone number already registered, please use another');
+        }
+
+        return true;
+    }),
 body('userName')
   .trim()
   .customSanitizer(value => {

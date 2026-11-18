@@ -115,7 +115,7 @@ exports.postSignup = (req, res, next) => {
                         name,
                         userName,
                         phoneNumber,
-                     email,
+                        email,
                         password: hashedPassword
                     });
 
