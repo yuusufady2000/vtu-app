@@ -59,8 +59,13 @@ exports.getSignup = (req, res, next) => {
   User.findOne({ email: email })
     .then(user => {
       if (!user) {
-        req.flash('error', 'Account not found')
-         res.redirect('/login');
+          return res.status(422).
+      render('shop/login', {
+        path: '/login',
+        pageTitle: 'Login',
+        errorMessage: errors.array()[0].msg,
+        oldInput: {email: email, password: password}
+    });
       }
       bcrypt
         .compare(password, user.password)
@@ -73,8 +78,13 @@ exports.getSignup = (req, res, next) => {
               res.redirect('/index');
             });
           }
-            req.flash('error', 'Invalid email address or password');
-         return res.redirect('/login');
+     return res.status(422).
+      render('shop/login', {
+        path: '/login',
+        pageTitle: 'Login',
+        errorMessage: errors.array()[0].msg,
+        oldInput: {email: email, password: password}
+    });
         })
         .catch(err => {
           console.log(err);
