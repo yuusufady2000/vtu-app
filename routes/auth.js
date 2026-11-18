@@ -29,18 +29,18 @@ router.post('/signup',check('email').isEmail().withMessage('Please enter a valid
             });
 }),
 body('phoneNumber')
-    .trim()
-    .customSanitizer(value => {
-        let phone = String(value).replace(/[\s-]/g, '');
+    // .trim()
+    // .customSanitizer(value => {
+    //     let phone = String(value).replace(/[\s-]/g, '');
 
-        if (phone.startsWith('+234')) {
-            phone = '0' + phone.slice(4);
-        } else if (phone.startsWith('234')) {
-            phone = '0' + phone.slice(3);
-        }
+    //     if (phone.startsWith('+234')) {
+    //         phone = '0' + phone.slice(4);
+    //     } else if (phone.startsWith('234')) {
+    //         phone = '0' + phone.slice(3);
+    //     }
 
-        return phone;
-    })
+    //     return phone;
+    // })
     .isLength({ min: 11, max: 11 })
     .withMessage('Phone number must be 11 digits')
     .bail()
@@ -61,33 +61,27 @@ body('phoneNumber')
         return true;
     }),
 body('userName')
-  .trim()
-  .customSanitizer(value => {
-    let p = String(value).replace(/[\s-]/g, '');
-    if (p.startsWith('+234')) {
-      p = '0' + p.slice(4);
-    }
-    if (p.startsWith('234') && p.length === 13) {
-      p = '0' + p.slice(3);
-    }
-    return p;
-  })
-  .isLength({ min: 11, max: 11 })
-  .withMessage('Phone number must be 11 digits')
-  .bail()
-  .matches(/^0[789][01]\d{8}$/)
-  .withMessage('Enter a valid Nigerian phone number')
-  .bail() 
-  .custom((value, { req }) => {
-    return User.findOne({ userName: value })
-      .select('_id')
-      .lean()
-      .then(existingUser => {
+    .trim()
+    .customSanitizer(value => String(value).toLowerCase().replace(/\s+/g, ''))
+    .isLength({ min: 3, max: 20 })
+    .withMessage('Username must be between 3 and 20 characters')
+    .bail()
+    .matches(/^[a-z0-9_]+$/)
+    .withMessage('Username can only contain letters, numbers and underscores')
+    .bail()
+    .custom(async value => {
+        const existingUser = await User.findOne({
+            userName: value
+        })
+            .select('_id')
+            .lean();
+
         if (existingUser) {
-          return Promise.reject('Username already registered, please use another');
+            throw new Error('Username already registered, please use another');
         }
-      });
-  }),
+
+        return true;
+    }),
 body('password', 'password must be at least 8 character' ).isLength({min: 8}),
 body('confirmPassword')
 .custom((value, { req }) => {
