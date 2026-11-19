@@ -1,171 +1,271 @@
- 
+
 <%- include('../includes/head.ejs') %>
- <style>
+<style>
+    .data-page {
+        width: min(1100px, 92%);
+        margin: 45px auto;
+    }
+
+    .data-header {
+        background: linear-gradient(120deg, #102c27, #176b50);
+        color: #fff;
+        padding: 35px;
+        border-radius: 18px;
+        margin-bottom: 30px;
+    }
+
+    .data-label {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: #a7f3d0;
+    }
+
+    .data-header h1 {
+        font-size: 32px;
+        margin: 12px 0 8px;
+    }
+
+    .data-header p {
+        color: #d1fae5;
+        margin: 0;
+    }
+
+    .data-content {
+        background: #fff;
+        padding: 25px;
+        border-radius: 16px;
+    }
+
+    .data-filter {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .data-filter label {
+        font-weight: 600;
+        color: #26352e;
+    }
+
+    .data-filter select {
+        padding: 11px 15px;
+        border: 1px solid #dce5df;
+        border-radius: 9px;
+        outline: none;
+        background: #fff;
+        min-width: 160px;
+    }
+
+    .plans-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 18px;
+    }
+
+    .plan-card {
+        border: 1px solid #e5ece7;
+        border-radius: 13px;
+        padding: 20px;
+        transition: .2s ease;
+    }
+
+    .plan-card:hover {
+        border-color: #168052;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .06);
+    }
+
+    .plan-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 22px;
+    }
+
+    .network-name {
+        font-weight: 700;
+        color: #176b50;
+    }
+
+    .plan-type {
+        background: #e9f8ef;
+        color: #176b50;
+        padding: 5px 9px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .plan-card h2 {
+        font-size: 19px;
+        color: #1c2b23;
+        margin: 0 0 20px;
+    }
+
+    .plan-details {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        color: #718078;
+        font-size: 13px;
+        padding-bottom: 17px;
+        border-bottom: 1px solid #edf1ee;
+    }
+
+    .plan-details strong {
+        color: #34463b;
+    }
+
+    .plan-bottom {
+        padding-top: 17px;
+    }
+
+    .plan-price {
+        display: block;
+        color: #176b50;
+        font-size: 23px;
+        margin-bottom: 15px;
+    }
+
+    .buy-btn {
+        width: 100%;
+        border: none;
+        background: #176b50;
+        color: white;
+        padding: 12px;
+        border-radius: 9px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .buy-btn:hover {
+        background: #102c27;
+    }
+
+    .buy-btn:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+    }
+
+    .empty-plans {
+        text-align: center;
+        padding: 55px 15px;
+        color: #68766e;
+    }
+
+    .empty-plans h3 {
+        color: #26352e;
+    }
+
+    .no-results {
+        display: none;
+        text-align: center;
+        padding: 30px;
+        color: #68766e;
+    }
+
+    .purchase-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        background: rgba(0, 0, 0, .6);
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .purchase-modal.active {
+        display: flex;
+    }
+
+    .purchase-box {
+        width: min(420px, 100%);
+        background: white;
+        padding: 28px;
+        border-radius: 15px;
+    }
+
+    .purchase-box h2 {
+        margin: 0 0 8px;
+        color: #176b50;
+    }
+
+    .purchase-box p {
+        color: #718078;
+    }
+
+    .purchase-box label {
+        display: block;
+        font-weight: 600;
+        margin: 18px 0 8px;
+    }
+
+    .purchase-box input {
+        width: 100%;
+        padding: 13px;
+        border: 1px solid #dce5df;
+        border-radius: 9px;
+        outline: none;
+    }
+
+    .purchase-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 22px;
+    }
+
+    .purchase-actions button {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    .confirm-btn {
+        background: #176b50;
+        color: white;
+    }
+
+    .cancel-btn {
+        background: #edf1ee;
+        color: #26352e;
+    }
+
+    @media (max-width: 600px) {
         .data-page {
-            width: min(1100px, 92%);
-            margin: 45px auto;
+            margin: 25px auto;
         }
 
         .data-header {
-            background: linear-gradient(120deg, #102c27, #176b50);
-            color: #fff;
-            padding: 35px;
-            border-radius: 18px;
-            margin-bottom: 30px;
-        }
-
-        .data-label {
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            color: #a7f3d0;
+            padding: 25px 20px;
         }
 
         .data-header h1 {
-            font-size: 32px;
-            margin: 12px 0 8px;
-        }
-
-        .data-header p {
-            color: #d1fae5;
-            margin: 0;
+            font-size: 26px;
         }
 
         .data-content {
-            background: #fff;
-            padding: 25px;
-            border-radius: 16px;
+            padding: 17px;
         }
 
         .data-filter {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .data-filter label {
-            font-weight: 600;
-            color: #26352e;
+            align-items: flex-start;
+            flex-direction: column;
         }
 
         .data-filter select {
-            padding: 11px 15px;
-            border: 1px solid #dce5df;
-            border-radius: 9px;
-            outline: none;
-            background: #fff;
-            min-width: 160px;
+            width: 100%;
         }
-
-        .plans-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 18px;
-        }
-
-        .plan-card {
-            border: 1px solid #e5ece7;
-            border-radius: 13px;
-            padding: 20px;
-            transition: .2s ease;
-        }
-
-        .plan-card:hover {
-            border-color: #168052;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, .06);
-        }
-
-        .plan-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 22px;
-        }
-
-        .network-name {
-            font-weight: 700;
-            color: #176b50;
-        }
-
-        .plan-type {
-            background: #e9f8ef;
-            color: #176b50;
-            padding: 5px 9px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .plan-card h2 {
-            font-size: 19px;
-            color: #1c2b23;
-            margin: 0 0 20px;
-        }
-
-        .plan-details {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            color: #718078;
-            font-size: 13px;
-            padding-bottom: 17px;
-            border-bottom: 1px solid #edf1ee;
-        }
-
-        .plan-details strong {
-            color: #34463b;
-        }
-
-        .plan-bottom {
-            padding-top: 17px;
-        }
-
-        .plan-price {
-            color: #176b50;
-            font-size: 23px;
-        }
-
-        .empty-plans {
-            text-align: center;
-            padding: 55px 15px;
-            color: #68766e;
-        }
-
-        .empty-plans h3 {
-            color: #26352e;
-        }
-
-        @media (max-width: 600px) {
-            .data-page {
-                margin: 25px auto;
-            }
-
-            .data-header {
-                padding: 25px 20px;
-            }
-
-            .data-header h1 {
-                font-size: 26px;
-            }
-
-            .data-content {
-                padding: 17px;
-            }
-
-            .data-filter {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .data-filter select {
-                width: 100%;
-            }
-        }
-    </style>
+    }
+</style>
 </head>
 
 <body>
@@ -173,11 +273,9 @@
 
     <main class="data-page">
         <section class="data-header">
-            <div>
-                <span class="data-label">DATA SERVICES</span>
-                <h1>Buy Data</h1>
-                <p>Select a data plan that suits your needs.</p>
-            </div>
+            <span class="data-label">DATA SERVICES</span>
+            <h1>Buy Data</h1>
+            <p>Select a data plan that suits your needs.</p>
         </section>
 
         <section class="data-content">
@@ -207,45 +305,136 @@
                                 <span class="network-name">
                                     <%= plan.network || plan.network_name || 'Network' %>
                                 </span>
+
                                 <span class="plan-type">
                                     <%= plan.plan_type || 'Data' %>
                                 </span>
                             </div>
 
-                            <h2><%= plan.plan_name || plan.name || 'Data Plan' %></h2>
+                            <h2>
+                                <%= plan.plan_name || plan.name || 'Data Plan' %>
+                            </h2>
 
                             <div class="plan-details">
                                 <span>Validity</span>
-                                <strong><%= plan.plan_day || plan.validity || 'Not specified' %></strong>
+                                <strong>
+                                    <%= plan.plan_day || plan.validity || 'Not specified' %>
+                                </strong>
                             </div>
 
                             <div class="plan-bottom">
                                 <strong class="plan-price">
                                     ₦<%= Number(plan.amount || plan.price || 0).toLocaleString('en-NG') %>
                                 </strong>
+
+                                <button
+                                    type="button"
+                                    class="buy-btn"
+                                    data-plan-id="<%= plan.plan_id || plan.id %>"
+                                    data-network-id="<%= plan.network_id || plan.network %>"
+                                    data-plan-name="<%= plan.plan_name || plan.name || 'Data Plan' %>"
+                                    data-price="<%= plan.amount || plan.price || 0 %>"
+                                    onclick="openPurchaseModal(this)">
+                                    Buy Data
+                                </button>
                             </div>
                         </article>
                     <% }) %>
+                </div>
+
+                <div class="no-results" id="noResults">
+                    No plans found for this network.
                 </div>
             <% } %>
         </section>
     </main>
 
+    <div class="purchase-modal" id="purchaseModal">
+        <div class="purchase-box">
+            <h2>Confirm Data Purchase</h2>
+            <p id="selectedPlan"></p>
+
+            <form action="/data" method="POST" id="purchaseForm">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+                <input type="hidden" name="planId" id="planId">
+                <input type="hidden" name="network" id="networkId">
+
+                <label for="phone">Recipient phone number</label>
+                <input
+                    type="tel"
+                    name="phone"
+                    id="phone"
+                    placeholder="Enter phone number"
+                    pattern="[0-9]{11}"
+                    maxlength="11"
+                    minlength="11"
+                    required>
+
+                <div class="purchase-actions">
+                    <button type="button" class="cancel-btn" onclick="closePurchaseModal()">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="confirm-btn" id="confirmBtn">
+                        Confirm Purchase
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const networkFilter = document.getElementById('networkFilter');
         const planCards = document.querySelectorAll('.plan-card');
+        const noResults = document.getElementById('noResults');
+        const purchaseModal = document.getElementById('purchaseModal');
+        const purchaseForm = document.getElementById('purchaseForm');
+        const confirmBtn = document.getElementById('confirmBtn');
 
         networkFilter.addEventListener('change', () => {
             const selectedNetwork = networkFilter.value;
+            let visibleCards = 0;
 
             planCards.forEach(card => {
                 const network = card.dataset.network;
 
-                card.style.display =
-                    selectedNetwork === 'all' || network.includes(selectedNetwork)
-                        ? ''
-                        : 'none';
+                const matches =
+                    selectedNetwork === 'all' ||
+                    network.includes(selectedNetwork);
+
+                card.style.display = matches ? '' : 'none';
+
+                if (matches) visibleCards++;
             });
+
+            noResults.style.display = visibleCards === 0 ? 'block' : 'none';
+        });
+
+        function openPurchaseModal(button) {
+            document.getElementById('planId').value = button.dataset.planId;
+            document.getElementById('networkId').value = button.dataset.networkId;
+
+            document.getElementById('selectedPlan').textContent =
+                button.dataset.planName + ' - ₦' +
+                Number(button.dataset.price).toLocaleString('en-NG');
+
+            purchaseModal.classList.add('active');
+        }
+
+        function closePurchaseModal() {
+            purchaseModal.classList.remove('active');
+        }
+
+        purchaseModal.addEventListener('click', event => {
+            if (event.target === purchaseModal) {
+                closePurchaseModal();
+            }
+        });
+
+        purchaseForm.addEventListener('submit', () => {
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Processing...';
         });
     </script>
 

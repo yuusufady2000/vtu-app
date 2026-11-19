@@ -14,7 +14,13 @@ router.get('/login', authController.getLogin);
 
 router.get('/signup',authController.getSignup);
 
-router.post('/login', check('email', 'Please enter a valid email').isEmail(),
+router.post('/login', body('email', 'Please enter a valid email').isEmail()
+.normalizeEmail(),
+body('password', 'Password has to be valid')
+
+.isLength({min: 5})
+.isAlphanumeric()
+.trim(),
 authController.postLogin);
 
 router.post('/signup',check('email').isEmail().withMessage('Please enter a valid email')
@@ -27,7 +33,8 @@ router.post('/signup',check('email').isEmail().withMessage('Please enter a valid
                     return Promise.reject('Email already registered, please use another email')
                 }
             });
-}),
+})
+.normalizeEmail(),
 body('phoneNumber')
     .trim()
     .customSanitizer(value => {
@@ -82,8 +89,11 @@ body('userName')
 
         return true;
     }),
-body('password', 'password must be at least 8 character' ).isLength({min: 8}),
+body('password', 'password must be at least 8 character' ).isLength({min: 8})
+.isAlphanumeric()
+.trim(),
 body('confirmPassword')
+.trim()
 .custom((value, { req }) => {
     if (value !== req.body.password){
         throw new Error('Password do not match')
